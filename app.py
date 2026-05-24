@@ -675,7 +675,7 @@ elif topic == "⚛️ Lattice Energy":
     n = data["n"]
     U = -(N_A * A * z * z * e**2) / (4 * math.pi * eps0 * r0) * (1 - 1/n) / 1000  # kJ/mol
 
-    tab_bh1, tab_bh2, tab_bh3 = st.tabs(["📊 Born-Haber Cycle", "🧮 Born-Landé", "📝 Step Details"])
+    tab_bh1, tab_bh3 = st.tabs(["📊 Born-Haber Cycle", "📝 Step Details"])
 
     with tab_bh1:
         st.markdown(f"**Born-Haber Cycle for {data['formula']}**")
@@ -828,35 +828,7 @@ elif topic == "⚛️ Lattice Energy":
         st.metric("Lattice Energy (Born-Landé)", f"{U:+.0f} kJ/mol",
                   help="Theoretical value using Born-Landé equation")
 
-    with tab_bh2:
-        st.markdown("### Born-Landé Equation")
-        st.latex(r"U = -\frac{N_A A z^+ z^- e^2}{4\pi\varepsilon_0 r_0}\left(1 - \frac{1}{n}\right)")
 
-        st.markdown("Adjust parameters to see how lattice energy changes:")
-        col_l1, col_l2, col_l3 = st.columns(3)
-        with col_l1:
-            adj_z = st.slider("Ionic charge (z⁺ = z⁻)", 1, 3, z, key="bl_z")
-        with col_l2:
-            adj_r = st.slider("Interionic distance r₀ (pm)", 50, 400, int(r0 * 1e12) if r0 * 1e12 < 400 else 250,
-                              5, key="bl_r")
-        with col_l3:
-            adj_n = st.slider("Born exponent (n)", 5, 12, n, key="bl_n")
-
-        adj_r_m = adj_r * 1e-12
-        U_adj = -(N_A * A * adj_z * adj_z * e**2) / (4 * math.pi * eps0 * adj_r_m) * (1 - 1/adj_n) / 1000
-
-        st.metric("Adjusted Lattice Energy", f"{U_adj:+.0f} kJ/mol")
-
-        if adj_z != z or adj_r != r0 * 1e12 or adj_n != n:
-            delta = U_adj - U
-            st.info(f"💡 Change from default: {delta:+.0f} kJ/mol")
-
-        st.markdown("""
-        **Factors affecting lattice energy:**
-        - **Higher ionic charge** → much more exothermic (stronger attraction)
-        - **Smaller ionic radius** → more exothermic (ions closer together)
-        - **Higher Born exponent** → slightly less exothermic
-        """)
 
     with tab_bh3:
         st.markdown(f"### Born-Haber Cycle Steps — {data['formula']}")
