@@ -761,11 +761,9 @@ elif topic == "⚛️ Lattice Energy":
         le_mid_y = (ions_level + product_level) / 2
         fig.add_annotation(
             x=le_x + 0.6, y=le_mid_y,
-            ax=le_x, ay=le_mid_y,
-            xref="x", yref="y", axref="x", ayref="y",
-            showarrow=True, arrowhead=0, arrowsize=0, arrowwidth=0, arrowcolor="rgba(0,0,0,0)",
             text=f"<b>Lattice Energy<br>−{abs(le_calc):.0f} kJ/mol</b>",
             font=dict(size=13, color="#8b5cf6"),
+            showarrow=False,
             xanchor="left",
         )
         # Draw the vertical LE arrow separately
