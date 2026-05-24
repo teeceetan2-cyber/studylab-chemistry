@@ -680,66 +680,139 @@ elif topic == "⚛️ Lattice Energy":
     with tab_bh1:
         st.markdown(f"**Born-Haber Cycle for {data['formula']}**")
 
-        # Build cycle steps
+        # Build cycle steps (up to EA only — LE is separate)
         steps = []
         if data["formula"] == "CaCl₂":
             steps = [
-                ("ΔH_atom(M)", data["dh_atom_M"], "#10b981", f"M(s) → M(g)"),
-                ("IE", data["ie"], "#f59e0b", f"M(g) → M{{z+}}(g) + ze⁻"),
-                ("2 × ΔH_atom(X)", 2 * data["dh_atom_X"], "#3b82f6", f"2X₂ → 2X(g)"),
-                ("2 × EA", 2 * data["ea"], "#ef4444", f"2X(g) + 2e⁻ → 2X⁻(g)"),
-                ("LE (calc)", -le_calc, "#8b5cf6", f"M{{z+}}(g) + 2X⁻(g) → MX₂(s)"),
+                ("ΔH_atom(M)", data["dh_atom_M"], "#10b981"),
+                ("IE", data["ie"], "#f59e0b"),
+                ("2 × ΔH_atom(X)", 2 * data["dh_atom_X"], "#3b82f6"),
+                ("2 × EA", 2 * data["ea"], "#ef4444"),
             ]
         elif data["formula"] == "Na₂O":
             steps = [
-                ("2 × ΔH_atom(M)", 2 * data["dh_atom_M"], "#10b981", f"2Na(s) → 2Na(g)"),
-                ("2 × IE", 2 * data["ie"], "#f59e0b", f"2Na(g) → 2Na⁺(g) + 2e⁻"),
-                ("ΔH_atom(X)", data["dh_atom_X"], "#3b82f6", f"½O₂ → O(g)"),
-                ("EA (O → O²⁻)", data["ea"], "#ef4444", f"O(g) + 2e⁻ → O²⁻(g)"),
-                ("LE (calc)", -le_calc, "#8b5cf6", f"2Na⁺(g) + O²⁻(g) → Na₂O(s)"),
+                ("2 × ΔH_atom(M)", 2 * data["dh_atom_M"], "#10b981"),
+                ("2 × IE", 2 * data["ie"], "#f59e0b"),
+                ("ΔH_atom(X)", data["dh_atom_X"], "#3b82f6"),
+                ("EA (O → O²⁻)", data["ea"], "#ef4444"),
             ]
         else:
             steps = [
-                ("ΔH_atom(M)", data["dh_atom_M"], "#10b981", f"M(s) → M(g)"),
-                ("IE (total)", data["ie"], "#f59e0b", f"M(g) → M{{z+}}(g) + ze⁻"),
-                ("ΔH_atom(X)", data["dh_atom_X"], "#3b82f6", f"½X₂ → X(g)"),
-                ("EA", data["ea"], "#ef4444", f"X(g) + e⁻ → X⁻(g)"),
-                ("LE (calc)", -le_calc, "#8b5cf6", f"M{{z+}}(g) + X⁻(g) → MX(s)"),
+                ("ΔH_atom(M)", data["dh_atom_M"], "#10b981"),
+                ("IE (total)", data["ie"], "#f59e0b"),
+                ("ΔH_atom(X)", data["dh_atom_X"], "#3b82f6"),
+                ("EA", data["ea"], "#ef4444"),
             ]
 
-        # Energy level diagram
+        # Energy level diagram: [0] → ... → gaseous ions (after EA) → product (ΔH_f)
+        # LE is the BIG DROP from ions to product
         energy_levels = [0]
-        level_labels = ["Elements (standard states)"]
+        level_labels = ["Elements<br>M(s) + ½X₂(g)"]
         level_colors = ["#6366f1"]
         cumulative = 0
-        for name, val, color, _ in steps:
+        for name, val, color in steps:
             cumulative += val
             energy_levels.append(cumulative)
             level_labels.append(name)
             level_colors.append(color)
 
-        # Add final ΔH_f
-        energy_levels.append(data["dh_f"])
-        level_labels.append(f"ΔH_f = {data['dh_f']:+.0f}")
-        level_colors.append("#10b981" if data["dh_f"] < 0 else "#ef4444")
+        # Gaseous ions level (after EA) = last cumulative value
+        ions_level = cumulative
+        product_level = data["dh_f"]
+
+        # Add the product level as final point
+        energy_levels.append(product_level)
+        level_labels.append(f"{data['formula']}(s)")
+        level_colors.append("#10b981" if product_level < 0 else "#ef4444")
+
+        # Also add ΔH_f as an annotation
+        dh_f_str = f"ΔH_f = {product_level:+.0f}"
 
         fig = go.Figure()
-        x_pos = list(range(len(energy_levels)))
+        n_points = len(energy_levels)
+        x_pos = list(range(n_points))
+
+        # Main path: elements up to gaseous ions (steps 0 through EA)
         fig.add_trace(go.Scatter(
-            x=x_pos, y=energy_levels, mode="lines+markers",
-            marker=dict(size=10, color=level_colors),
+            x=x_pos[:n_points-1], y=energy_levels[:n_points-1], mode="lines+markers",
+            marker=dict(size=10, color=level_colors[:n_points-1]),
             line=dict(color="#555", width=2, dash="dot"),
-            text=level_labels,
+            text=level_labels[:n_points-1],
             hovertemplate="%{text}<br>%{y:+.0f} kJ/mol<extra></extra>",
+            name="Steps",
             showlegend=False,
         ))
 
-        for i in range(len(energy_levels) - 1):
+        # Gaseous ion label at top
+        ion_label = data.get("cation", "M⁺") + "(g) + " + data.get("anion", "X⁻") + "(g)"
+        fig.add_annotation(
+            x=x_pos[n_points-2], y=ions_level,
+            text=f"<b>{ion_label}</b>",
+            showarrow=True, arrowhead=0, arrowcolor="#888", arrowsize=0.5,
+            ax=40, ay=-20,
+            font=dict(size=12, color="#f59e0b"),
+            bgcolor="#1a1d2a",
+            bordercolor="#555",
+            borderwidth=1,
+        )
+
+        # ── LATTICE ENERGY: bold arrow from ions DOWN to product ──
+        le_x = (x_pos[n_points-2] + x_pos[n_points-1]) / 2
+        le_mid_y = (ions_level + product_level) / 2
+        fig.add_annotation(
+            x=le_x + 0.6, y=le_mid_y,
+            ax=le_x, ay=le_mid_y,
+            xref="x", yref="y", axref="x", ayref="y",
+            showarrow=True, arrowhead=0, arrowsize=0, arrowwidth=0, arrowcolor="rgba(0,0,0,0)",
+            text=f"<b>Lattice Energy<br>−{abs(le_calc):.0f} kJ/mol</b>",
+            font=dict(size=13, color="#8b5cf6"),
+            xanchor="left",
+        )
+        # Draw the vertical LE arrow separately
+        fig.add_annotation(
+            x=le_x, y=ions_level,
+            ax=le_x, ay=product_level,
+            xref="x", yref="y", axref="x", ayref="y",
+            showarrow=True,
+            arrowhead=2, arrowsize=2, arrowwidth=4, arrowcolor="#8b5cf6",
+            text="",
+        )
+
+        # Product point
+        fig.add_trace(go.Scatter(
+            x=[x_pos[n_points-1]], y=[product_level], mode="markers",
+            marker=dict(size=14, color="#10b981", symbol="diamond",
+                        line=dict(color="white", width=2)),
+            text=[f"{data['formula']}(s)"],
+            hovertemplate="%{text}<br>%{y:+.0f} kJ/mol<extra></extra>",
+            name="Product",
+            showlegend=False,
+        ))
+
+        # Step annotations (arrows between levels)
+        for i in range(len(steps)):
             mid_x = (x_pos[i] + x_pos[i + 1]) / 2
             diff = energy_levels[i + 1] - energy_levels[i]
+            color = "#10b981" if diff >= 0 else "#ef4444"
             fig.add_annotation(x=mid_x, y=energy_levels[i] + diff / 2,
                                text=f"{diff:+.0f}",
-                               showarrow=False, font=dict(size=11, color="#aaa"))
+                               showarrow=False, font=dict(size=10, color=color))
+
+        # ΔH_f bracket on the right
+        fig.add_annotation(
+            x=max(x_pos) + 0.8, y=(0 + product_level) / 2,
+            text=f"<b>ΔH_f = {product_level:+.0f} kJ/mol</b>",
+            showarrow=False,
+            font=dict(size=12, color="#10b981"),
+        )
+        # Bracket lines for ΔH_f
+        fig.add_annotation(
+            x=max(x_pos) + 0.3, y=0,
+            ax=max(x_pos) + 0.3, ay=product_level,
+            xref="x", yref="y", axref="x", ayref="y",
+            showarrow=True, arrowhead=0, arrowwidth=2, arrowcolor="#10b981",
+            text="",
+        )
 
         fig.update_layout(
             height=450,
@@ -789,16 +862,46 @@ elif topic == "⚛️ Lattice Energy":
 
     with tab_bh3:
         st.markdown(f"### Born-Haber Cycle Steps — {data['formula']}")
-        for name, val, color, desc in steps:
+
+        cation = data.get("cation", "M⁺")
+        anion = data.get("anion", "X⁻")
+        formula = data["formula"]
+
+        step_descs = {
+            "ΔH_atom(M)": f"{formula.split(chr(8216) if chr(8216) in formula else formula)[0] if formula[0].isalpha() else 'M'}(s) → {formula.split(chr(8216) if chr(8216) in formula else formula)[0] if formula[0].isalpha() else 'M'}(g)",
+        }
+
+        step_labels = {
+            "ΔH_atom(M)": f"M(s) → M(g)",
+            "IE": f"M(g) → {cation}(g) + e⁻",
+            "IE (total)": f"M(g) → {cation}(g) + e⁻",
+            "2 × IE": f"2M(g) → 2{cation}(g) + 2e⁻",
+            "ΔH_atom(X)": f"½X₂(g) → X(g)",
+            "2 × ΔH_atom(X)": f"X₂(g) → 2X(g)",
+            "EA": f"X(g) + e⁻ → {anion}(g)",
+            "2 × EA": f"2X(g) + 2e⁻ → 2{anion}(g)",
+            "EA (O → O²⁻)": f"O(g) + 2e⁻ → O²⁻(g)",
+        }
+
+        for name, val, color in steps:
+            desc = step_labels.get(name, name)
             st.markdown(f"""<div style="background:{color}22;border-left:4px solid {color};
                         padding:8px 12px;border-radius:6px;margin:6px 0;">
                         <b style="color:{color}">{name}</b>: {val:+.0f} kJ/mol<br>
                         <span style="color:#aaa;font-size:0.9em">{desc}</span>
                         </div>""", unsafe_allow_html=True)
 
-        total = sum(v for _, v, _, _ in steps)
+        # Lattice Energy as separate bold step
+        st.markdown(f"""<div style="background:#8b5cf622;border-left:4px solid #8b5cf6;
+                    padding:8px 12px;border-radius:6px;margin:6px 0;">
+                    <b style="color:#8b5cf6">Lattice Energy</b>: {le_calc:+.0f} kJ/mol<br>
+                    <span style="color:#aaa;font-size:0.9em">{cation}(g) + {anion}(g) → {formula}(s)</span>
+                    </div>""", unsafe_allow_html=True)
+
+        step_total = sum(v for _, v, _ in steps)
         st.markdown(f"""<div style="background:#1a1d2a;padding:10px 12px;border-radius:6px;margin-top:10px;">
-            <b>Sum of steps:</b> {total:+.0f} kJ/mol<br>
+            <b>Gaseous ions (after EA):</b> {step_total:+.0f} kJ/mol<br>
+            <b>After Lattice Energy:</b> {step_total + le_calc:+.0f} kJ/mol<br>
             <b>ΔH<sub>f</sub> (experimental):</b> {data['dh_f']:+.0f} kJ/mol
         </div>""", unsafe_allow_html=True)
 
