@@ -768,8 +768,8 @@ elif topic == "⚛️ Lattice Energy":
         )
         # Draw the vertical LE arrow separately
         fig.add_annotation(
-            x=le_x, y=ions_level,
-            ax=le_x, ay=product_level,
+            x=le_x, y=product_level,
+            ax=le_x, ay=ions_level,
             xref="x", yref="y", axref="x", ayref="y",
             showarrow=True,
             arrowhead=2, arrowsize=2, arrowwidth=4, arrowcolor="#8b5cf6",
