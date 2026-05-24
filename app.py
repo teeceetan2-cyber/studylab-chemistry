@@ -27,6 +27,7 @@ category = st.sidebar.selectbox("Category", [
     "🧮 Stoichiometry",
     "💨 Gas Laws",
     "🔬 Periodic Table",
+    "🔥 Energetics",
 ])
 
 topic_map = {
@@ -34,6 +35,14 @@ topic_map = {
     "🧮 Stoichiometry": ["Molar Mass Calculator", "Stoichiometry"],
     "💨 Gas Laws": ["Ideal Gas Law"],
     "🔬 Periodic Table": ["Periodic Trend Explorer"],
+    "🔥 Energetics": [
+        "⚡ Enthalpy Profile",
+        "🔥 Calorimetry",
+        "📐 Hess's Law",
+        "🔗 Bond Enthalpy",
+        "⚛️ Lattice Energy",
+        "🧿 Gibbs Free Energy",
+    ],
 }
 
 topic = st.sidebar.radio("Topic", topic_map[category])
@@ -270,6 +279,656 @@ elif topic == "Periodic Trend Explorer":
         f"(left → right) and "
         f"{'increases' if decrease_across else 'decreases'} down a group (top → bottom)."
     )
+
+# ================================================================
+#                    ⚡ ENTHALPY PROFILE
+# ================================================================
+elif topic == "⚡ Enthalpy Profile":
+    st.markdown("## ⚡ Enthalpy Profile")
+    st.markdown("Visualize energy changes in exothermic and endothermic reactions.")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        dh = st.number_input("Enthalpy change ΔH (kJ/mol)", -500.0, 500.0, -100.0, 5.0,
+                             help="Negative = exothermic, Positive = endothermic")
+    with col2:
+        ea = st.number_input("Activation energy Ea (kJ/mol)", 0.0, 500.0, 50.0, 5.0,
+                             help="Energy barrier from reactants to transition state")
+
+    is_exo = dh < 0
+    dh_abs = abs(dh)
+
+    # Energy profile: reactants at 0, products at dh, peak at ea
+    r_energy = 0.0
+    ts_energy = ea
+    p_energy = dh
+
+    # Build smooth curve
+    x_curve = np.linspace(0, 4, 200)
+    y_curve = np.piecewise(x_curve,
+        [x_curve < 1.5, (x_curve >= 1.5) & (x_curve < 2.5), x_curve >= 2.5],
+        [lambda x: np.interp(x, [0, 1.5], [r_energy, ts_energy]),
+         lambda x: np.interp(x, [1.5, 2.5], [ts_energy, ts_energy]),
+         lambda x: np.interp(x, [2.5, 4], [ts_energy, p_energy])])
+    # Smooth using polynomial
+    z = np.polyfit([0, 1.5, 2.5, 4], [r_energy, ts_energy, ts_energy, p_energy], 3)
+    y_smooth = np.polyval(z, x_curve)
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=x_curve, y=y_smooth, mode="lines",
+                              line=dict(color="#6366f1", width=3),
+                              name="Reaction progress",
+                              hovertemplate="Energy: %{y:.1f} kJ/mol<extra></extra>"))
+    # Horizontal dashed lines for energy levels
+    max_y = max(ea, 0) * 1.3
+    min_y = min(dh, 0) * 1.3
+    y_range = [min_y - 20, max_y + 20]
+    fig.add_hline(y=r_energy, line=dict(color="#10b981", width=1, dash="dot"), name="Reactants")
+    fig.add_hline(y=p_energy, line=dict(color="#f59e0b", width=1, dash="dot"), name="Products")
+    fig.add_hline(y=ts_energy, line=dict(color="#ef4444", width=1, dash="dot"), name="Transition state")
+
+    # ΔH arrow
+    mid_x = 2.0
+    arrow_y = (r_energy + p_energy) / 2
+    fig.add_annotation(x=3.8, y=arrow_y,
+                       text=f"ΔH = {dh:+.0f} kJ/mol {'🔥' if is_exo else '❄️'}",
+                       showarrow=False,
+                       font=dict(size=14, color="#10b981" if is_exo else "#ef4444"))
+
+    # Ea arrow
+    ea_mid_y = (r_energy + ts_energy) / 2
+    fig.add_annotation(x=1.5, y=ea_mid_y - 20,
+                       text=f"Ea = {ea:.0f} kJ/mol",
+                       showarrow=False,
+                       font=dict(size=12, color="#f59e0b"))
+
+    fig.update_layout(
+        height=450,
+        xaxis=dict(showticklabels=False, title="Reaction progress →"),
+        yaxis=dict(title="Enthalpy (kJ/mol)"),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font_color="#ccc",
+        margin=dict(l=10, r=10, t=10, b=30),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Summary
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        st.metric("Reaction type", "Exothermic 🔥" if is_exo else "Endothermic ❄️")
+    with col_b:
+        st.metric("ΔH", f"{dh:+.0f} kJ/mol")
+    with col_c:
+        st.metric("Activation Energy Ea", f"{ea:.0f} kJ/mol")
+
+    st.info(f"""
+    💡 **{('Exothermic' if is_exo else 'Endothermic')} reactions** — The products have
+    **{'lower' if is_exo else 'higher'}** enthalpy than the reactants.
+    ΔH = **{dh:+.0f} kJ/mol**.
+    """)
+
+# ================================================================
+#                      🔥 CALORIMETRY
+# ================================================================
+elif topic == "🔥 Calorimetry":
+    st.markdown("## 🔥 Calorimetry")
+    st.latex(r"q = mc\Delta T")
+    st.markdown("Solve for any variable in the heat equation.")
+
+    solve_for = st.radio("Solve for:", ["Heat energy (q)", "Mass (m)", "Specific heat capacity (c)", "Temperature change (ΔT)"],
+                          horizontal=True)
+
+    if solve_for == "Heat energy (q)":
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            m = st.number_input("Mass (g)", 0.0, 10000.0, 100.0, 1.0)
+        with col2:
+            c = st.number_input("Specific heat capacity (J/g·°C)", 0.0, 10.0, 4.18, 0.01,
+                                help="Water = 4.18, Ice = 2.09, Aluminum = 0.90")
+        with col3:
+            dt = st.number_input("ΔT (°C)", -200.0, 200.0, 10.0, 0.5)
+        q = m * c * dt
+        unit = "kJ" if abs(q) >= 1000 else "J"
+        val = q / 1000 if abs(q) >= 1000 else q
+        st.success(f"**q = {val:.4f} {unit}**")
+        st.markdown(f"""<div class="result-box">
+            q = {m:.2f}g × {c:.4f} J/g°C × {dt:+.2f}°C = {q:.2f} J = {q/1000:.4f} kJ
+        </div>""", unsafe_allow_html=True)
+        if q > 0:
+            st.info("🔥 System **gains** heat (endothermic process)")
+        else:
+            st.info("❄️ System **loses** heat (exothermic process)")
+
+    elif solve_for == "Mass (m)":
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            q = st.number_input("Heat energy q (J)", 0.0, 1e7, 4180.0, 100.0)
+        with col2:
+            c = st.number_input("Specific heat capacity (J/g·°C)", 0.0, 10.0, 4.18, 0.01)
+        with col3:
+            dt = st.number_input("ΔT (°C)", 0.0, 200.0, 10.0, 0.5)
+        m = q / (c * dt) if c * dt > 0 else 0
+        st.success(f"**m = {m:.4f} g**")
+
+    elif solve_for == "Specific heat capacity (c)":
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            q = st.number_input("Heat energy q (J)", 0.0, 1e7, 4180.0, 100.0)
+        with col2:
+            m = st.number_input("Mass (g)", 0.0, 10000.0, 100.0, 1.0)
+        with col3:
+            dt = st.number_input("ΔT (°C)", 0.0, 200.0, 10.0, 0.5)
+        c = q / (m * dt) if m * dt > 0 else 0
+        st.success(f"**c = {c:.4f} J/g·°C**")
+        if 4.0 < c < 4.3:
+            st.info("💡 This is close to water's specific heat capacity (4.18 J/g·°C)")
+
+    else:  # ΔT
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            q = st.number_input("Heat energy q (J)", -1e7, 1e7, 4180.0, 100.0)
+        with col2:
+            m = st.number_input("Mass (g)", 0.0, 10000.0, 100.0, 1.0)
+        with col3:
+            c = st.number_input("Specific heat capacity (J/g·°C)", 0.0, 10.0, 4.18, 0.01)
+        dt = q / (m * c) if m * c > 0 else 0
+        st.success(f"**ΔT = {dt:.4f} °C**")
+
+    st.markdown("### Common Specific Heat Capacities")
+    common_c = {"Water": 4.18, "Ice (−10°C)": 2.09, "Steam": 2.01, "Aluminum": 0.90,
+                 "Copper": 0.39, "Iron": 0.45, "Gold": 0.13, "Ethanol": 2.44}
+    cols = st.columns(4)
+    for i, (mat, val) in enumerate(common_c.items()):
+        cols[i % 4].metric(mat, f"{val} J/g·°C")
+
+# ================================================================
+#                   📐 HESS'S LAW
+# ================================================================
+elif topic == "📐 Hess's Law":
+    st.markdown("## 📐 Hess's Law")
+    st.latex(r"\Delta H_{\text{target}} = \sum \Delta H_{\text{steps}}")
+    st.markdown("Calculate the enthalpy change of a target reaction using known ΔH values of other reactions.")
+
+    st.subheader("Step Reactions")
+    n_steps = st.slider("Number of steps", 2, 5, 3)
+
+    step_eqs = []
+    step_dhs = []
+    coeffs = []
+    cols = st.columns(min(n_steps, 3))
+    for i in range(n_steps):
+        with cols[i % 3]:
+            st.markdown(f"**Step {i + 1}**")
+            eq = st.text_input(f"Equation {i + 1}", placeholder=f"e.g. A → B",
+                               key=f"hess_eq_{i}", label_visibility="collapsed")
+            dh = st.number_input(f"ΔH {i + 1} (kJ/mol)", -1000.0, 1000.0, 0.0, 5.0,
+                                 key=f"hess_dh_{i}", format="%.1f", label_visibility="collapsed")
+            coeff = st.selectbox(f"Coefficient", [1, -1, 2, -2, 3, -3, 0.5, -0.5], index=0,
+                                 key=f"hess_c_{i}", label_visibility="collapsed",
+                                 help="Use -1 if the reaction is reversed, 2 if doubled, etc.")
+            step_eqs.append(eq)
+            step_dhs.append(dh)
+            coeffs.append(coeff)
+
+    target_dh = sum(dh * c for dh, c in zip(step_dhs, coeffs))
+
+    if any(eq for eq in step_eqs):
+        st.divider()
+        st.subheader("Calculation")
+        lines = []
+        for i, (eq, dh, c) in enumerate(zip(step_eqs, step_dhs, coeffs)):
+            sign = "+" if c >= 0 else "−"
+            arrow = "→" if c >= 0 else "←"
+            mod_eq = f"{eq}"
+            if abs(c) != 1:
+                mod_eq = f"({abs(c):g}) {eq.split('→')[0].strip() if '→' in eq else eq} → ..."
+            lines.append(f"{sign} ΔH{i + 1} = {c * dh:+.1f} kJ/mol")
+
+        st.markdown(f"""<div class="result-box">
+            <b>Target ΔH = {' + '.join(f'({c:.1f} × {dh:.1f})' for dh, c in zip(step_dhs, coeffs) if c != 0) if any(c != 0 for c in coeffs) else '0'}</b><br>
+            <b>ΔH<sub>target</sub> = {target_dh:+.2f} kJ/mol</b>
+        </div>""", unsafe_allow_html=True)
+
+        # Visual bar
+        colors = ["#10b981" if dh * c >= 0 else "#ef4444" for dh, c in zip(step_dhs, coeffs)]
+        fig = go.Figure()
+        for i, (eq, dh, c, color) in enumerate(zip(step_eqs, step_dhs, coeffs, colors)):
+            val = c * dh
+            fig.add_trace(go.Bar(
+                x=[abs(val)], y=[f"Step {i + 1}"], orientation="h",
+                marker_color=color,
+                name=f"Step {i + 1}: {val:+.0f} kJ/mol",
+                text=f"{val:+.0f}" if val != 0 else "0",
+                textposition="outside",
+            ))
+        fig.add_trace(go.Bar(
+            x=[abs(target_dh)], y=["Target"], orientation="h",
+            marker_color="#6366f1",
+            name=f"Target: {target_dh:+.0f} kJ/mol",
+            text=f"{target_dh:+.0f}",
+            textposition="outside",
+        ))
+        fig.update_layout(
+            height=60 * (n_steps + 2),
+            barmode="relative",
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font_color="#ccc",
+            xaxis=dict(title="ΔH (kJ/mol)"),
+            showlegend=False,
+            margin=dict(l=10, r=10, t=10, b=10),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+# ================================================================
+#                     🔗 BOND ENTHALPY
+# ================================================================
+elif topic == "🔗 Bond Enthalpy":
+    st.markdown("## 🔗 Bond Enthalpy")
+    st.latex(r"\Delta H = \sum \text{{Bonds broken}} - \sum \text{{Bonds formed}}")
+
+    BOND_ENERGIES = {
+        "H−H": 436, "H−F": 565, "H−Cl": 431, "H−Br": 366, "H−I": 299,
+        "C−H": 413, "C−C": 347, "C=C": 612, "C≡C": 839,
+        "C−O": 358, "C=O": 799, "C≡O": 1072,
+        "C−N": 305, "C=N": 615, "C≡N": 891,
+        "O−H": 463, "O−O": 146, "O=O": 498,
+        "N−H": 391, "N≡N": 945, "N−N": 163,
+        "F−F": 158, "Cl−Cl": 242, "Br−Br": 193, "I−I": 151,
+        "S−H": 363, "S−S": 268,
+        "P−O": 335, "P=O": 544,
+        "Si−O": 464, "Si−Si": 222,
+        "C−Cl": 339, "C−Br": 276, "C−I": 240,
+        "O−C=O": 532,
+    }
+
+    tab_b, tab_c = st.tabs(["Calculator", "Bond Energy Table"])
+
+    with tab_b:
+        st.markdown("Enter bonds broken (reactants) and bonds formed (products):")
+        col_b1, col_b2 = st.columns(2)
+
+        with col_b1:
+            st.markdown("**Bonds Broken** (energy absorbed)")
+            broken_bonds = []
+            for i in range(6):
+                bb = st.selectbox(f"Bond {i + 1}", [""] + sorted(BOND_ENERGIES.keys()), index=0,
+                                  key=f"bb_{i}", label_visibility="collapsed")
+                bc = st.number_input(f"Count", 0, 10, 1, key=f"bc_{i}", label_visibility="collapsed")
+                if bb and bc:
+                    broken_bonds.append((bb, BOND_ENERGIES[bb], bc))
+
+        with col_b2:
+            st.markdown("**Bonds Formed** (energy released)")
+            formed_bonds = []
+            for i in range(6):
+                fb = st.selectbox(f"Bond {i + 1}", [""] + sorted(BOND_ENERGIES.keys()), index=0,
+                                  key=f"fb_{i}", label_visibility="collapsed")
+                fc = st.number_input(f"Count", 0, 10, 1, key=f"fc_{i}", label_visibility="collapsed")
+                if fb and fc:
+                    formed_bonds.append((fb, BOND_ENERGIES[fb], fc))
+
+        if broken_bonds or formed_bonds:
+            total_broken = sum(energy * count for _, energy, count in broken_bonds)
+            total_formed = sum(energy * count for _, energy, count in formed_bonds)
+            dh_bond = total_broken - total_formed
+
+            st.divider()
+            col_r1, col_r2, col_r3 = st.columns(3)
+            with col_r1:
+                st.metric("Energy absorbed (broken)", f"{total_broken:.0f} kJ/mol")
+            with col_r2:
+                st.metric("Energy released (formed)", f"{total_formed:.0f} kJ/mol")
+            with col_r3:
+                st.metric("ΔH", f"{dh_bond:+.0f} kJ/mol",
+                          delta_color="inverse")
+
+            fig = go.Figure()
+            fig.add_trace(go.Bar(name="Bonds broken (+)", x=["Energy"], y=[total_broken],
+                                  marker_color="#ef4444",
+                                  text=f"{total_broken:.0f} kJ/mol", textposition="outside"))
+            fig.add_trace(go.Bar(name="Bonds formed (−)", x=["Energy"], y=[-total_formed],
+                                  marker_color="#10b981",
+                                  text=f"−{total_formed:.0f} kJ/mol", textposition="outside"))
+            fig.add_trace(go.Bar(name=f"ΔH = {dh_bond:+.0f}", x=["Net"], y=[dh_bond],
+                                  marker_color="#6366f1",
+                                  text=f"{dh_bond:+.0f} kJ/mol", textposition="outside"))
+            fig.update_layout(height=300, plot_bgcolor="rgba(0,0,0,0)",
+                              paper_bgcolor="rgba(0,0,0,0)", font_color="#ccc",
+                              margin=dict(l=10, r=10, t=10, b=10))
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.info("Exothermic " if dh_bond < 0 else "Endothermic ")
+
+    with tab_c:
+        st.markdown("**Average Bond Energies (kJ/mol)**")
+        cols = st.columns(3)
+        sorted_bonds = sorted(BOND_ENERGIES.items(), key=lambda x: x[0])
+        for i, (bond, energy) in enumerate(sorted_bonds):
+            cols[i % 3].metric(bond, f"{energy} kJ/mol")
+
+# ================================================================
+#                    ⚛️ LATTICE ENERGY
+# ================================================================
+elif topic == "⚛️ Lattice Energy":
+    st.markdown("## ⚛️ Lattice Energy — Born-Haber Cycle")
+
+    # Preset compounds with thermodynamic data (kJ/mol)
+    COMPOUNDS = {
+        "NaCl": {
+            "formula": "NaCl", "cation": "Na⁺", "anion": "Cl⁻",
+            "dh_f": -411, "dh_atom_M": 108, "dh_atom_X": 122,
+            "ie": 496, "ea": -349, "le": None,  # calculated
+            "r_cation": 102, "r_anion": 181, "z": 1, "n": 9, "A": 1.7476,
+        },
+        "MgO": {
+            "formula": "MgO", "cation": "Mg²⁺", "anion": "O²⁻",
+            "dh_f": -602, "dh_atom_M": 148, "dh_atom_X": 249,
+            "ie": 2188, "ea": -844, "le": None,
+            "r_cation": 72, "r_anion": 140, "z": 2, "n": 7, "A": 1.7476,
+        },
+        "KCl": {
+            "formula": "KCl", "cation": "K⁺", "anion": "Cl⁻",
+            "dh_f": -436, "dh_atom_M": 89, "dh_atom_X": 122,
+            "ie": 419, "ea": -349, "le": None,
+            "r_cation": 138, "r_anion": 181, "z": 1, "n": 9, "A": 1.7476,
+        },
+        "CaCl₂": {
+            "formula": "CaCl₂", "cation": "Ca²⁺", "anion": "Cl⁻",
+            "dh_f": -796, "dh_atom_M": 178, "dh_atom_X": 122,
+            "ie": 1735, "ea": -349, "le": None,
+            "r_cation": 100, "r_anion": 181, "z": 2, "n": 9, "A": 2.408,
+        },
+        "Na₂O": {
+            "formula": "Na₂O", "cation": "Na⁺", "anion": "O²⁻",
+            "dh_f": -414, "dh_atom_M": 108, "dh_atom_X": 249,
+            "ie": 496, "ea": -844, "le": None,
+            "r_cation": 102, "r_anion": 140, "z": 1, "n": 7, "A": 2.408,
+        },
+    }
+
+    compound = st.selectbox("Select compound", list(COMPOUNDS.keys()), key="bh_compound")
+    data = COMPOUNDS[compound]
+
+    # Calculate lattice energy using Born-Haber cycle
+    # ΔH_f = ΔH_atom(M) + IE + ΔH_atom(X) + EA + LE
+    # LE = ΔH_f - ΔH_atom(M) - IE - ΔH_atom(X) - EA
+    nacl_stoich = 1 if data["formula"] not in ["CaCl₂", "Na₂O"] else (
+        2 if data["formula"] == "CaCl₂" else 1  # Na₂O: needs different handling
+    )
+
+    if data["formula"] == "CaCl₂":
+        le_calc = data["dh_f"] - data["dh_atom_M"] - data["ie"] - 2 * data["dh_atom_X"] - 2 * data["ea"]
+    elif data["formula"] == "Na₂O":
+        le_calc = data["dh_f"] - 2 * data["dh_atom_M"] - 2 * data["ie"] - data["dh_atom_X"] - data["ea"]
+    else:
+        le_calc = data["dh_f"] - data["dh_atom_M"] - data["ie"] - data["dh_atom_X"] - data["ea"]
+
+    # Born-Landé theoretical calculation
+    N_A = 6.022e23
+    e = 1.602e-19
+    eps0 = 8.854e-12
+    r0 = (data["r_cation"] + data["r_anion"]) * 1e-12  # pm to m
+    z = data["z"]
+    A = data["A"]
+    n = data["n"]
+    U = -(N_A * A * z * z * e**2) / (4 * math.pi * eps0 * r0) * (1 - 1/n) / 1000  # kJ/mol
+
+    tab_bh1, tab_bh2, tab_bh3 = st.tabs(["📊 Born-Haber Cycle", "🧮 Born-Landé", "📝 Step Details"])
+
+    with tab_bh1:
+        st.markdown(f"**Born-Haber Cycle for {data['formula']}**")
+
+        # Build cycle steps
+        steps = []
+        if data["formula"] == "CaCl₂":
+            steps = [
+                ("ΔH_atom(M)", data["dh_atom_M"], "#10b981", f"M(s) → M(g)"),
+                ("IE", data["ie"], "#f59e0b", f"M(g) → M{{z+}}(g) + ze⁻"),
+                ("2 × ΔH_atom(X)", 2 * data["dh_atom_X"], "#3b82f6", f"2X₂ → 2X(g)"),
+                ("2 × EA", 2 * data["ea"], "#ef4444", f"2X(g) + 2e⁻ → 2X⁻(g)"),
+                ("LE (calc)", -le_calc, "#8b5cf6", f"M{{z+}}(g) + 2X⁻(g) → MX₂(s)"),
+            ]
+        elif data["formula"] == "Na₂O":
+            steps = [
+                ("2 × ΔH_atom(M)", 2 * data["dh_atom_M"], "#10b981", f"2Na(s) → 2Na(g)"),
+                ("2 × IE", 2 * data["ie"], "#f59e0b", f"2Na(g) → 2Na⁺(g) + 2e⁻"),
+                ("ΔH_atom(X)", data["dh_atom_X"], "#3b82f6", f"½O₂ → O(g)"),
+                ("EA (O → O²⁻)", data["ea"], "#ef4444", f"O(g) + 2e⁻ → O²⁻(g)"),
+                ("LE (calc)", -le_calc, "#8b5cf6", f"2Na⁺(g) + O²⁻(g) → Na₂O(s)"),
+            ]
+        else:
+            steps = [
+                ("ΔH_atom(M)", data["dh_atom_M"], "#10b981", f"M(s) → M(g)"),
+                ("IE (total)", data["ie"], "#f59e0b", f"M(g) → M{{z+}}(g) + ze⁻"),
+                ("ΔH_atom(X)", data["dh_atom_X"], "#3b82f6", f"½X₂ → X(g)"),
+                ("EA", data["ea"], "#ef4444", f"X(g) + e⁻ → X⁻(g)"),
+                ("LE (calc)", -le_calc, "#8b5cf6", f"M{{z+}}(g) + X⁻(g) → MX(s)"),
+            ]
+
+        # Energy level diagram
+        energy_levels = [0]
+        level_labels = ["Elements (standard states)"]
+        level_colors = ["#6366f1"]
+        cumulative = 0
+        for name, val, color, _ in steps:
+            cumulative += val
+            energy_levels.append(cumulative)
+            level_labels.append(name)
+            level_colors.append(color)
+
+        # Add final ΔH_f
+        energy_levels.append(data["dh_f"])
+        level_labels.append(f"ΔH_f = {data['dh_f']:+.0f}")
+        level_colors.append("#10b981" if data["dh_f"] < 0 else "#ef4444")
+
+        fig = go.Figure()
+        y_pos = list(range(len(energy_levels)))
+        fig.add_trace(go.Scatter(
+            x=energy_levels, y=y_pos, mode="lines+markers",
+            marker=dict(size=10, color=level_colors),
+            line=dict(color="#555", width=2, dash="dot"),
+            text=level_labels,
+            hovertemplate="%{text}<br>%{x:+.0f} kJ/mol<extra></extra>",
+            showlegend=False,
+        ))
+
+        for i in range(len(energy_levels) - 1):
+            mid_y = (y_pos[i] + y_pos[i + 1]) / 2
+            diff = energy_levels[i + 1] - energy_levels[i]
+            fig.add_annotation(x=energy_levels[i] + diff / 2, y=mid_y,
+                               text=f"{diff:+.0f}",
+                               showarrow=False, font=dict(size=11, color="#aaa"))
+
+        fig.update_layout(
+            height=400,
+            xaxis=dict(title="Enthalpy (kJ/mol)"),
+            yaxis=dict(visible=False),
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font_color="#ccc",
+            margin=dict(l=10, r=30, t=10, b=30),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.metric("Lattice Energy (Born-Haber)", f"{le_calc:+.0f} kJ/mol",
+                  help="From experimental ΔH_f and cycle data")
+        st.metric("Lattice Energy (Born-Landé)", f"{U:+.0f} kJ/mol",
+                  help="Theoretical value using Born-Landé equation")
+
+    with tab_bh2:
+        st.markdown("### Born-Landé Equation")
+        st.latex(r"U = -\frac{N_A A z^+ z^- e^2}{4\pi\varepsilon_0 r_0}\left(1 - \frac{1}{n}\right)")
+
+        st.markdown("Adjust parameters to see how lattice energy changes:")
+        col_l1, col_l2, col_l3 = st.columns(3)
+        with col_l1:
+            adj_z = st.slider("Ionic charge (z⁺ = z⁻)", 1, 3, z, key="bl_z")
+        with col_l2:
+            adj_r = st.slider("Interionic distance r₀ (pm)", 50, 400, int(r0 * 1e12) if r0 * 1e12 < 400 else 250,
+                              5, key="bl_r")
+        with col_l3:
+            adj_n = st.slider("Born exponent (n)", 5, 12, n, key="bl_n")
+
+        adj_r_m = adj_r * 1e-12
+        U_adj = -(N_A * A * adj_z * adj_z * e**2) / (4 * math.pi * eps0 * adj_r_m) * (1 - 1/adj_n) / 1000
+
+        st.metric("Adjusted Lattice Energy", f"{U_adj:+.0f} kJ/mol")
+
+        if adj_z != z or adj_r != r0 * 1e12 or adj_n != n:
+            delta = U_adj - U
+            st.info(f"💡 Change from default: {delta:+.0f} kJ/mol")
+
+        st.markdown("""
+        **Factors affecting lattice energy:**
+        - **Higher ionic charge** → much more exothermic (stronger attraction)
+        - **Smaller ionic radius** → more exothermic (ions closer together)
+        - **Higher Born exponent** → slightly less exothermic
+        """)
+
+    with tab_bh3:
+        st.markdown(f"### Born-Haber Cycle Steps — {data['formula']}")
+        for name, val, color, desc in steps:
+            st.markdown(f"""<div style="background:{color}22;border-left:4px solid {color};
+                        padding:8px 12px;border-radius:6px;margin:6px 0;">
+                        <b style="color:{color}">{name}</b>: {val:+.0f} kJ/mol<br>
+                        <span style="color:#aaa;font-size:0.9em">{desc}</span>
+                        </div>""", unsafe_allow_html=True)
+
+        total = sum(v for _, v, _, _ in steps)
+        st.markdown(f"""<div style="background:#1a1d2a;padding:10px 12px;border-radius:6px;margin-top:10px;">
+            <b>Sum of steps:</b> {total:+.0f} kJ/mol<br>
+            <b>ΔH<sub>f</sub> (experimental):</b> {data['dh_f']:+.0f} kJ/mol
+        </div>""", unsafe_allow_html=True)
+
+# ================================================================
+#                   🧿 GIBBS FREE ENERGY
+# ================================================================
+elif topic == "🧿 Gibbs Free Energy":
+    st.markdown("## 🧿 Gibbs Free Energy & Entropy")
+    st.latex(r"\Delta G = \Delta H - T\Delta S")
+    st.markdown("Predict reaction spontaneity.")
+
+    tab_g1, tab_g2 = st.tabs(["🧮 Calculator", "📊 Spontaneity Explorer"])
+
+    with tab_g1:
+        col_g1, col_g2, col_g3 = st.columns(3)
+        with col_g1:
+            dh_g = st.number_input("ΔH (kJ/mol)", -500.0, 500.0, -100.0, 5.0, key="gibbs_dh")
+        with col_g2:
+            ds_g = st.number_input("ΔS (J/mol·K)", -300.0, 300.0, 100.0, 5.0, key="gibbs_ds",
+                                   help="Entropy change in J/mol·K")
+        with col_g3:
+            t_g = st.number_input("Temperature T (K)", 0.0, 2000.0, 298.0, 5.0, key="gibbs_t",
+                                  help="Standard = 298 K")
+
+        ds_kj = ds_g / 1000.0  # Convert to kJ
+        dg = dh_g - t_g * ds_kj
+
+        col_r1, col_r2, col_r3 = st.columns(3)
+        with col_r1:
+            st.metric("ΔG", f"{dg:+.2f} kJ/mol")
+        with col_r2:
+            spont = dg < 0
+            label = "Spontaneous 🟢" if spont else "Non-spontaneous 🔴"
+            if abs(dg) < 1:
+                label = "Equilibrium ⚠️"
+            st.metric("Spontaneity", label)
+        with col_r3:
+            st.metric("TΔS term", f"{t_g * ds_kj:+.2f} kJ/mol")
+
+        # Spontaneity summary
+        if dh_g < 0 and ds_g > 0:
+            summary = "**ΔH < 0, ΔS > 0** → Spontaneous at **all** temperatures"
+        elif dh_g > 0 and ds_g < 0:
+            summary = "**ΔH > 0, ΔS < 0** → Non-spontaneous at **all** temperatures"
+        elif dh_g < 0 and ds_g < 0:
+            t_crit = dh_g / ds_kj
+            summary = f"**ΔH < 0, ΔS < 0** → Spontaneous **below** T = {t_crit:.0f} K"
+        else:
+            t_crit = dh_g / ds_kj
+            summary = f"**ΔH > 0, ΔS > 0** → Spontaneous **above** T = {t_crit:.0f} K"
+
+        st.info(f"💡 {summary}")
+
+    with tab_g2:
+        st.markdown("### Spontaneity vs Temperature")
+        st.markdown("See how ΔG changes with temperature.")
+
+        col_e1, col_e2 = st.columns(2)
+        with col_e1:
+            dh_e = st.number_input("ΔH (kJ/mol)", -500.0, 500.0, -100.0, 5.0, key="gibbs_exp_dh")
+        with col_e2:
+            ds_e = st.number_input("ΔS (J/mol·K)", -300.0, 300.0, 100.0, 5.0, key="gibbs_exp_ds")
+
+        ds_e_kj = ds_e / 1000.0
+        temps = np.linspace(50, 1500, 300)
+        dg_vals = dh_e - temps * ds_e_kj
+
+        # Find critical temperature if applicable
+        if abs(ds_e) > 0.1:
+            t_crit = dh_e / ds_e_kj
+        else:
+            t_crit = None
+
+        fig = go.Figure()
+        colors = ["#10b981" if v < 0 else "#ef4444" for v in dg_vals]
+        fig.add_trace(go.Scatter(
+            x=temps, y=dg_vals, mode="lines",
+            line=dict(color="#6366f1", width=3),
+            name="ΔG vs T",
+            hovertemplate="T = %{x:.0f} K<br>ΔG = %{y:+.2f} kJ/mol<extra></extra>",
+        ))
+
+        # Zero line
+        fig.add_hline(y=0, line=dict(color="#888", width=1, dash="dash"),
+                       annotation_text="Spontaneous ΔG < 0")
+
+        # Critical temperature marker
+        if t_crit and 50 <= t_crit <= 1500:
+            dg_at_tcrit = dh_e - t_crit * ds_e_kj
+            fig.add_trace(go.Scatter(
+                x=[t_crit], y=[dg_at_tcrit], mode="markers",
+                marker=dict(size=14, color="#f59e0b", symbol="star"),
+                name=f"T_crit = {t_crit:.0f} K",
+            ))
+
+        # Fill between curve and zero
+        dg_pos = [v if v > 0 else 0 for v in dg_vals]
+        dg_neg = [v if v < 0 else 0 for v in dg_vals]
+        fig.add_trace(go.Scatter(
+            x=temps, y=dg_pos, mode="lines",
+            fill="tozeroy", fillcolor="rgba(239,68,68,0.1)",
+            line=dict(width=0), showlegend=False, hovertemplate="%{y:.1f}",
+        ))
+        fig.add_trace(go.Scatter(
+            x=temps, y=dg_neg, mode="lines",
+            fill="tozeroy", fillcolor="rgba(16,185,129,0.1)",
+            line=dict(width=0), showlegend=False, hovertemplate="%{y:.1f}",
+        ))
+
+        fig.update_layout(
+            height=400,
+            xaxis=dict(title="Temperature (K)"),
+            yaxis=dict(title="ΔG (kJ/mol)"),
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font_color="#ccc",
+            hovermode="x unified",
+            margin=dict(l=10, r=10, t=10, b=30),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        if t_crit:
+            if ds_e > 0 and dh_e < 0:
+                st.success("🟢 Spontaneous at all temperatures (ΔH < 0, ΔS > 0)")
+            elif ds_e < 0 and dh_e > 0:
+                st.error("🔴 Non-spontaneous at all temperatures (ΔH > 0, ΔS < 0)")
+            elif ds_e < 0 and dh_e < 0:
+                st.info(f"🟢 Spontaneous below {t_crit:.0f} K | 🔴 Non-spontaneous above")
+            else:
+                st.info(f"🔴 Non-spontaneous below {t_crit:.0f} K | 🟢 Spontaneous above")
 
 # ── FOOTER ────────────────────────────────────────────────
 st.markdown("---")
