@@ -724,27 +724,27 @@ elif topic == "⚛️ Lattice Energy":
         level_colors.append("#10b981" if data["dh_f"] < 0 else "#ef4444")
 
         fig = go.Figure()
-        y_pos = list(range(len(energy_levels)))
+        x_pos = list(range(len(energy_levels)))
         fig.add_trace(go.Scatter(
-            x=energy_levels, y=y_pos, mode="lines+markers",
+            x=x_pos, y=energy_levels, mode="lines+markers",
             marker=dict(size=10, color=level_colors),
             line=dict(color="#555", width=2, dash="dot"),
             text=level_labels,
-            hovertemplate="%{text}<br>%{x:+.0f} kJ/mol<extra></extra>",
+            hovertemplate="%{text}<br>%{y:+.0f} kJ/mol<extra></extra>",
             showlegend=False,
         ))
 
         for i in range(len(energy_levels) - 1):
-            mid_y = (y_pos[i] + y_pos[i + 1]) / 2
+            mid_x = (x_pos[i] + x_pos[i + 1]) / 2
             diff = energy_levels[i + 1] - energy_levels[i]
-            fig.add_annotation(x=energy_levels[i] + diff / 2, y=mid_y,
+            fig.add_annotation(x=mid_x, y=energy_levels[i] + diff / 2,
                                text=f"{diff:+.0f}",
                                showarrow=False, font=dict(size=11, color="#aaa"))
 
         fig.update_layout(
-            height=400,
-            xaxis=dict(title="Enthalpy (kJ/mol)"),
-            yaxis=dict(visible=False),
+            height=450,
+            xaxis=dict(visible=False),
+            yaxis=dict(title="Enthalpy (kJ/mol)", zeroline=True, zerolinecolor="#555"),
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
             font_color="#ccc",
