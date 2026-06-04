@@ -1131,86 +1131,65 @@ elif topic == "Electrolysis":
     st.markdown("## 🔋 Electrolysis — Comparison Table")
     st.markdown("Comparing dilute HCl, NaCl(aq), and concentrated NaCl side by side.")
 
-    st.markdown("""
-<style>
-    .elect-cell {
-        border: 1px solid #444;
-        padding: 8px 10px;
-        border-radius: 0;
-        background: #0f0f1a;
-        height: 100%;
-    }
-    .elect-header {
-        background: #1a1a2e;
-        border: 1px solid #444;
-        padding: 8px 10px;
-        font-weight: 700;
-        text-align: center;
-    }
-    .elect-label {
-        border: 1px solid #444;
-        padding: 8px 10px;
-        background: #1a1a2e;
-        font-weight: 600;
-    }
-</style>
-""", unsafe_allow_html=True)
+    rows = [
+        ("Cation", "H⁺", "H⁺, Na⁺", "H⁺, Na⁺"),
+        ("Anion", "OH⁻, Cl⁻", "OH⁻, Cl⁻", "OH⁻, Cl⁻"),
+    ]
+    eq_rows = [
+        ("Anode Eqn",
+         "4OH⁻ → 2H₂O + O₂ + 4e⁻",
+         "2Cl⁻ → Cl₂ + 2e⁻",
+         "2Cl⁻ → Cl₂ + 2e⁻"),
+        ("Overall",
+         "2H₂O → 2H₂ + O₂",
+         "2Cl⁻ + 2H₂O → H₂ + Cl₂ + 2OH⁻",
+         "2Cl⁻ + 2H₂O → H₂ + Cl₂ + 2OH⁻"),
+    ]
+    obs_rows = [
+        ("Products", "H₂, O₂", "H₂, Cl₂, NaOH", "H₂, Cl₂, NaOH"),
+        ("Anode obs.",
+         "Bubbles of O₂<br>(vol. = ½ H₂)",
+         "Bubbles of Cl₂<br>(yellowish-green, vol. = H₂)",
+         "Bubbles of Cl₂<br>(yellowish-green, vol. = H₂)"),
+        ("Electrolyte",
+         "Acid conc. ↑",
+         "[NaCl] ↑, pH constant",
+         "NaOH forms, pH ↑"),
+    ]
 
-    header = st.columns([1.3, 1.8, 1.8, 1.8])
-    header[0].markdown('<div class="elect-header">Electrolyte</div>', unsafe_allow_html=True)
-    header[1].markdown('<div class="elect-header">Dilute HCl</div>', unsafe_allow_html=True)
-    header[2].markdown('<div class="elect-header">NaCl (aq)</div>', unsafe_allow_html=True)
-    header[3].markdown('<div class="elect-header">Conc. NaCl</div>', unsafe_allow_html=True)
+    html = """<table style="width:100%;border-collapse:collapse;font-size:14px;">
+    <tr style="background:#1a1a2e;">
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;">Electrolyte</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;">Dilute HCl</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;">NaCl (aq)</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;">Conc. NaCl</th>
+    </tr>"""
 
-    def row(label, *vals):
-        cols = st.columns([1.3, 1.8, 1.8, 1.8])
-        cols[0].markdown(f'<div class="elect-label">{label}</div>', unsafe_allow_html=True)
-        for i, v in enumerate(vals):
-            cols[i+1].markdown(f'<div class="elect-cell">{v}</div>', unsafe_allow_html=True)
+    def _td(v):
+        return f'<td style="border:1px solid #444;padding:8px 10px;text-align:center;">{v}</td>'
 
-    def row_latex(label, *vals):
-        cols = st.columns([1.3, 1.8, 1.8, 1.8])
-        cols[0].markdown(f'<div class="elect-label">{label}</div>', unsafe_allow_html=True)
-        for i, v in enumerate(vals):
-            cols[i+1].markdown(f'<div class="elect-cell">${v}$</div>', unsafe_allow_html=True)
+    def _tr(label, v1, v2, v3):
+        return (f'<tr><td style="border:1px solid #444;padding:8px 10px;background:#1a1a2e;font-weight:600;">{label}</td>'
+                + _td(v1) + _td(v2) + _td(v3) + "</tr>")
 
-    st.divider()
-    row("Cation", "H⁺", "H⁺, Na⁺", "H⁺, Na⁺")
-    row("Anion", "OH⁻, Cl⁻", "OH⁻, Cl⁻", "OH⁻, Cl⁻")
+    for r in rows:
+        html += _tr(*r)
 
-    st.divider()
-    st.markdown("**Cathode** — same for all:")
-    st.latex(r"2H^+(aq) + 2e^- \rightarrow H_2(g)")
+    html += """<tr>
+        <td style="border:1px solid #444;padding:8px 10px;background:#1a1a2e;font-weight:600;">Cathode</td>
+        <td colspan="3" style="border:1px solid #444;padding:8px 10px;text-align:center;">
+            $$2H^+(aq) + 2e^- \\rightarrow H_2(g)$$<br><small>Same for all — bubbles of H₂ gas</small>
+        </td>
+    </tr>"""
 
-    st.markdown("**Anode**")
-    row_latex("Equation",
-        r"4OH^- \rightarrow 2H_2O + O_2 + 4e^-",
-        r"2Cl^- \rightarrow Cl_2 + 2e^-",
-        r"2Cl^- \rightarrow Cl_2 + 2e^-")
+    for r in eq_rows:
+        html += _tr(*r)
 
-    st.divider()
-    row_latex("Overall",
-        r"2H_2O \rightarrow 2H_2 + O_2",
-        r"2Cl^- + 2H_2O \rightarrow H_2 + Cl_2 + 2OH^-",
-        r"2Cl^- + 2H_2O \rightarrow H_2 + Cl_2 + 2OH^-")
+    for r in obs_rows:
+        html += _tr(*r)
 
-    st.divider()
-    row("Products",
-        "H₂, O₂",
-        "H₂, Cl₂, NaOH",
-        "H₂, Cl₂, NaOH")
-
-    st.divider()
-    st.markdown("**Observations**")
-    st.markdown("Cathode (all): Bubbles of hydrogen gas")
-    row("Anode",
-        "Bubbles of O₂\n(vol. half of H₂)",
-        "Bubbles of Cl₂\n(yellowish-green, vol. = H₂)",
-        "Bubbles of Cl₂\n(yellowish-green, vol. = H₂)")
-    row("Electrolyte",
-        "Acid concentration ↑",
-        "[NaCl] ↑, pH constant",
-        "NaOH forms, pH ↑")
+    html += "</table>"
+    st.markdown(html, unsafe_allow_html=True)
 
 # ================================================================
 #                     📖 QUALITATIVE ANALYSIS
