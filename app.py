@@ -223,62 +223,178 @@ elif topic == "Ideal Gas Law":
 # ================================================================
 elif topic == "Periodic Trend Explorer":
     st.markdown("## Periodic Trends")
-    st.markdown("Explore how properties vary across groups and down periods.")
+    st.markdown("Explore how properties vary across groups and down periods. Compare up to 2 different sets.")
 
-    trend = st.selectbox("Property", [
-        "Atomic Radius (pm)", "Ionization Energy (eV)",
-        "Electronegativity (Pauling)", "Electron Affinity (eV)",
-    ])
-
-    elements_data = {
-        "Li": {"Atomic Radius": 152, "Ionization Energy": 5.39, "Electronegativity": 0.98, "Electron Affinity": 0.618, "Period": 2},
-        "Be": {"Atomic Radius": 112, "Ionization Energy": 9.32, "Electronegativity": 1.57, "Electron Affinity": -0.5, "Period": 2},
-        "B":  {"Atomic Radius": 87,  "Ionization Energy": 8.30, "Electronegativity": 2.04, "Electron Affinity": 0.277, "Period": 2},
-        "C":  {"Atomic Radius": 77,  "Ionization Energy": 11.26, "Electronegativity": 2.55, "Electron Affinity": 1.262, "Period": 2},
-        "N":  {"Atomic Radius": 75,  "Ionization Energy": 14.53, "Electronegativity": 3.04, "Electron Affinity": -0.07, "Period": 2},
-        "O":  {"Atomic Radius": 73,  "Ionization Energy": 13.62, "Electronegativity": 3.44, "Electron Affinity": 1.461, "Period": 2},
-        "F":  {"Atomic Radius": 71,  "Ionization Energy": 17.42, "Electronegativity": 3.98, "Electron Affinity": 3.399, "Period": 2},
-        "Ne": {"Atomic Radius": 69,  "Ionization Energy": 21.56, "Electronegativity": 0.0, "Electron Affinity": -1.2, "Period": 2},
-        "Na": {"Atomic Radius": 186, "Ionization Energy": 5.14, "Electronegativity": 0.93, "Electron Affinity": 0.548, "Period": 3},
-        "Mg": {"Atomic Radius": 160, "Ionization Energy": 7.65, "Electronegativity": 1.31, "Electron Affinity": -0.4, "Period": 3},
-        "Al": {"Atomic Radius": 143, "Ionization Energy": 5.99, "Electronegativity": 1.61, "Electron Affinity": 0.433, "Period": 3},
-        "Si": {"Atomic Radius": 117, "Ionization Energy": 8.15, "Electronegativity": 1.90, "Electron Affinity": 1.385, "Period": 3},
-        "P":  {"Atomic Radius": 110, "Ionization Energy": 10.49, "Electronegativity": 2.19, "Electron Affinity": 0.746, "Period": 3},
-        "S":  {"Atomic Radius": 104, "Ionization Energy": 10.36, "Electronegativity": 2.58, "Electron Affinity": 2.077, "Period": 3},
-        "Cl": {"Atomic Radius": 99,  "Ionization Energy": 12.97, "Electronegativity": 3.16, "Electron Affinity": 3.613, "Period": 3},
-        "Ar": {"Atomic Radius": 97,  "Ionization Energy": 15.76, "Electronegativity": 0.0, "Electron Affinity": -1.0, "Period": 3},
+    # ── Comprehensive element data: Groups 1A–8A & Period 4 ──
+    ELEMENTS = {
+        # Group 1A (Alkali metals)
+        "Li": {"Atomic Radius": 152, "Ionization Energy": 5.39, "Electronegativity": 0.98, "Electron Affinity": 0.618, "Group": "1A", "Period": 2, "Color": "#e74c3c"},
+        "Na": {"Atomic Radius": 186, "Ionization Energy": 5.14, "Electronegativity": 0.93, "Electron Affinity": 0.548, "Group": "1A", "Period": 3, "Color": "#e74c3c"},
+        "K":  {"Atomic Radius": 227, "Ionization Energy": 4.34, "Electronegativity": 0.82, "Electron Affinity": 0.502, "Group": "1A", "Period": 4, "Color": "#e74c3c"},
+        "Rb": {"Atomic Radius": 248, "Ionization Energy": 4.18, "Electronegativity": 0.78, "Electron Affinity": 0.486, "Group": "1A", "Period": 5, "Color": "#e74c3c"},
+        "Cs": {"Atomic Radius": 265, "Ionization Energy": 3.89, "Electronegativity": 0.79, "Electron Affinity": 0.472, "Group": "1A", "Period": 6, "Color": "#e74c3c"},
+        # Group 2A (Alkaline earth)
+        "Be": {"Atomic Radius": 112, "Ionization Energy": 9.32, "Electronegativity": 1.57, "Electron Affinity": -0.5, "Group": "2A", "Period": 2, "Color": "#f39c12"},
+        "Mg": {"Atomic Radius": 160, "Ionization Energy": 7.65, "Electronegativity": 1.31, "Electron Affinity": -0.4, "Group": "2A", "Period": 3, "Color": "#f39c12"},
+        "Ca": {"Atomic Radius": 197, "Ionization Energy": 6.11, "Electronegativity": 1.00, "Electron Affinity": 0.024, "Group": "2A", "Period": 4, "Color": "#f39c12"},
+        "Sr": {"Atomic Radius": 215, "Ionization Energy": 5.70, "Electronegativity": 0.95, "Electron Affinity": 0.052, "Group": "2A", "Period": 5, "Color": "#f39c12"},
+        "Ba": {"Atomic Radius": 222, "Ionization Energy": 5.21, "Electronegativity": 0.89, "Electron Affinity": 0.138, "Group": "2A", "Period": 6, "Color": "#f39c12"},
+        # Group 3A (13)
+        "B":  {"Atomic Radius": 87,  "Ionization Energy": 8.30, "Electronegativity": 2.04, "Electron Affinity": 0.277, "Group": "3A", "Period": 2, "Color": "#2ecc71"},
+        "Al": {"Atomic Radius": 143, "Ionization Energy": 5.99, "Electronegativity": 1.61, "Electron Affinity": 0.433, "Group": "3A", "Period": 3, "Color": "#2ecc71"},
+        "Ga": {"Atomic Radius": 122, "Ionization Energy": 6.00, "Electronegativity": 1.81, "Electron Affinity": 0.43, "Group": "3A", "Period": 4, "Color": "#2ecc71"},
+        "In": {"Atomic Radius": 163, "Ionization Energy": 5.79, "Electronegativity": 1.78, "Electron Affinity": 0.30, "Group": "3A", "Period": 5, "Color": "#2ecc71"},
+        "Tl": {"Atomic Radius": 170, "Ionization Energy": 6.11, "Electronegativity": 1.62, "Electron Affinity": 0.20, "Group": "3A", "Period": 6, "Color": "#2ecc71"},
+        # Group 4A (14)
+        "C":  {"Atomic Radius": 77,  "Ionization Energy": 11.26, "Electronegativity": 2.55, "Electron Affinity": 1.262, "Group": "4A", "Period": 2, "Color": "#1abc9c"},
+        "Si": {"Atomic Radius": 117, "Ionization Energy": 8.15, "Electronegativity": 1.90, "Electron Affinity": 1.385, "Group": "4A", "Period": 3, "Color": "#1abc9c"},
+        "Ge": {"Atomic Radius": 122, "Ionization Energy": 7.90, "Electronegativity": 2.01, "Electron Affinity": 1.23, "Group": "4A", "Period": 4, "Color": "#1abc9c"},
+        "Sn": {"Atomic Radius": 140, "Ionization Energy": 7.34, "Electronegativity": 1.96, "Electron Affinity": 1.20, "Group": "4A", "Period": 5, "Color": "#1abc9c"},
+        "Pb": {"Atomic Radius": 175, "Ionization Energy": 7.42, "Electronegativity": 2.33, "Electron Affinity": 0.36, "Group": "4A", "Period": 6, "Color": "#1abc9c"},
+        # Group 5A (15)
+        "N":  {"Atomic Radius": 75,  "Ionization Energy": 14.53, "Electronegativity": 3.04, "Electron Affinity": -0.07, "Group": "5A", "Period": 2, "Color": "#3498db"},
+        "P":  {"Atomic Radius": 110, "Ionization Energy": 10.49, "Electronegativity": 2.19, "Electron Affinity": 0.746, "Group": "5A", "Period": 3, "Color": "#3498db"},
+        "As": {"Atomic Radius": 121, "Ionization Energy": 9.81, "Electronegativity": 2.18, "Electron Affinity": 0.81, "Group": "5A", "Period": 4, "Color": "#3498db"},
+        "Sb": {"Atomic Radius": 140, "Ionization Energy": 8.64, "Electronegativity": 2.05, "Electron Affinity": 1.05, "Group": "5A", "Period": 5, "Color": "#3498db"},
+        "Bi": {"Atomic Radius": 155, "Ionization Energy": 7.29, "Electronegativity": 2.02, "Electron Affinity": 0.95, "Group": "5A", "Period": 6, "Color": "#3498db"},
+        # Group 6A (16)
+        "O":  {"Atomic Radius": 73,  "Ionization Energy": 13.62, "Electronegativity": 3.44, "Electron Affinity": 1.461, "Group": "6A", "Period": 2, "Color": "#9b59b6"},
+        "S":  {"Atomic Radius": 104, "Ionization Energy": 10.36, "Electronegativity": 2.58, "Electron Affinity": 2.077, "Group": "6A", "Period": 3, "Color": "#9b59b6"},
+        "Se": {"Atomic Radius": 117, "Ionization Energy": 9.75, "Electronegativity": 2.55, "Electron Affinity": 2.02, "Group": "6A", "Period": 4, "Color": "#9b59b6"},
+        "Te": {"Atomic Radius": 137, "Ionization Energy": 9.01, "Electronegativity": 2.10, "Electron Affinity": 1.97, "Group": "6A", "Period": 5, "Color": "#9b59b6"},
+        "Po": {"Atomic Radius": 167, "Ionization Energy": 8.42, "Electronegativity": 2.00, "Electron Affinity": 1.09, "Group": "6A", "Period": 6, "Color": "#9b59b6"},
+        # Group 7A (Halogens)
+        "F":  {"Atomic Radius": 71,  "Ionization Energy": 17.42, "Electronegativity": 3.98, "Electron Affinity": 3.399, "Group": "7A", "Period": 2, "Color": "#e67e22"},
+        "Cl": {"Atomic Radius": 99,  "Ionization Energy": 12.97, "Electronegativity": 3.16, "Electron Affinity": 3.613, "Group": "7A", "Period": 3, "Color": "#e67e22"},
+        "Br": {"Atomic Radius": 114, "Ionization Energy": 11.81, "Electronegativity": 2.96, "Electron Affinity": 3.365, "Group": "7A", "Period": 4, "Color": "#e67e22"},
+        "I":  {"Atomic Radius": 133, "Ionization Energy": 10.45, "Electronegativity": 2.66, "Electron Affinity": 3.059, "Group": "7A", "Period": 5, "Color": "#e67e22"},
+        "At": {"Atomic Radius": 140, "Ionization Energy": 9.32, "Electronegativity": 2.20, "Electron Affinity": 2.80, "Group": "7A", "Period": 6, "Color": "#e67e22"},
+        # Group 8A (Noble gases)
+        "He": {"Atomic Radius": 31,  "Ionization Energy": 24.59, "Electronegativity": 0.0, "Electron Affinity": -0.5, "Group": "8A", "Period": 1, "Color": "#95a5a6"},
+        "Ne": {"Atomic Radius": 69,  "Ionization Energy": 21.56, "Electronegativity": 0.0, "Electron Affinity": -1.2, "Group": "8A", "Period": 2, "Color": "#95a5a6"},
+        "Ar": {"Atomic Radius": 97,  "Ionization Energy": 15.76, "Electronegativity": 0.0, "Electron Affinity": -1.0, "Group": "8A", "Period": 3, "Color": "#95a5a6"},
+        "Kr": {"Atomic Radius": 112, "Ionization Energy": 14.00, "Electronegativity": 0.0, "Electron Affinity": -0.6, "Group": "8A", "Period": 4, "Color": "#95a5a6"},
+        "Xe": {"Atomic Radius": 130, "Ionization Energy": 12.13, "Electronegativity": 0.0, "Electron Affinity": -0.5, "Group": "8A", "Period": 5, "Color": "#95a5a6"},
+        "Rn": {"Atomic Radius": 145, "Ionization Energy": 10.75, "Electronegativity": 0.0, "Electron Affinity": -0.5, "Group": "8A", "Period": 6, "Color": "#95a5a6"},
+        # Period 4 transition metals + Ga–Kr
+        "Sc": {"Atomic Radius": 162, "Ionization Energy": 6.56, "Electronegativity": 1.36, "Electron Affinity": 0.188, "Group": "3B", "Period": 4, "Color": "#1abc9c"},
+        "Ti": {"Atomic Radius": 147, "Ionization Energy": 6.83, "Electronegativity": 1.54, "Electron Affinity": 0.079, "Group": "4B", "Period": 4, "Color": "#3498db"},
+        "V":  {"Atomic Radius": 134, "Ionization Energy": 6.75, "Electronegativity": 1.63, "Electron Affinity": 0.525, "Group": "5B", "Period": 4, "Color": "#9b59b6"},
+        "Cr": {"Atomic Radius": 128, "Ionization Energy": 6.77, "Electronegativity": 1.66, "Electron Affinity": 0.666, "Group": "6B", "Period": 4, "Color": "#e74c3c"},
+        "Mn": {"Atomic Radius": 127, "Ionization Energy": 7.43, "Electronegativity": 1.55, "Electron Affinity": 0.0, "Group": "7B", "Period": 4, "Color": "#e67e22"},
+        "Fe": {"Atomic Radius": 126, "Ionization Energy": 7.90, "Electronegativity": 1.83, "Electron Affinity": 0.151, "Group": "8B", "Period": 4, "Color": "#f39c12"},
+        "Co": {"Atomic Radius": 125, "Ionization Energy": 7.88, "Electronegativity": 1.88, "Electron Affinity": 0.662, "Group": "8B", "Period": 4, "Color": "#2ecc71"},
+        "Ni": {"Atomic Radius": 124, "Ionization Energy": 7.64, "Electronegativity": 1.91, "Electron Affinity": 1.156, "Group": "8B", "Period": 4, "Color": "#1abc9c"},
+        "Cu": {"Atomic Radius": 128, "Ionization Energy": 7.73, "Electronegativity": 1.90, "Electron Affinity": 1.235, "Group": "1B", "Period": 4, "Color": "#3498db"},
+        "Zn": {"Atomic Radius": 134, "Ionization Energy": 9.39, "Electronegativity": 1.65, "Electron Affinity": 0.0, "Group": "2B", "Period": 4, "Color": "#9b59b6"},
     }
 
-    if "Radius" in trend:
-        prop, unit = "Atomic Radius", "pm"
-    elif "Ionization" in trend:
-        prop, unit = "Ionization Energy", "eV"
-    elif "Electronegativity" in trend:
-        prop, unit = "Electronegativity", "Pauling"
-    else:
-        prop, unit = "Electron Affinity", "eV"
+    # Property mapping
+    props = {
+        "Atomic Radius (pm)": ("Atomic Radius", "pm"),
+        "Ionization Energy (eV)": ("Ionization Energy", "eV"),
+        "Electronegativity (Pauling)": ("Electronegativity", "Pauling"),
+        "Electron Affinity (eV)": ("Electron Affinity", "eV"),
+    }
 
-    period2 = {k: v for k, v in elements_data.items() if v["Period"] == 2}
-    period3 = {k: v for k, v in elements_data.items() if v["Period"] == 3}
+    # Set definitions: groups + period
+    set_elements = {
+        "Group 1A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "1A"],
+        "Group 2A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "2A"],
+        "Group 3A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "3A"],
+        "Group 4A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "4A"],
+        "Group 5A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "5A"],
+        "Group 6A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "6A"],
+        "Group 7A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "7A"],
+        "Group 8A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "8A"],
+        "Period 4": [sym for sym, d in ELEMENTS.items() if d["Period"] == 4],
+    }
 
+    group_colors = {
+        "Group 1A": "#e74c3c", "Group 2A": "#f39c12", "Group 3A": "#2ecc71",
+        "Group 4A": "#1abc9c", "Group 5A": "#3498db", "Group 6A": "#9b59b6",
+        "Group 7A": "#e67e22", "Group 8A": "#95a5a6", "Period 4": "#6366f1",
+    }
+
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        trend = st.selectbox("Property", list(props.keys()))
+    with col2:
+        chart_type = st.selectbox("Chart type", ["Bar chart", "Line chart"])
+
+    prop, unit = props[trend]
+
+    # Set 1
+    set1_label = st.selectbox("Set 1", list(set_elements.keys()), key="set1")
+    compare = st.checkbox("Compare with another set")
+
+    set2_label = None
+    if compare:
+        set2_options = [s for s in set_elements.keys() if s != set1_label]
+        set2_label = st.selectbox("Set 2", set2_options, key="set2")
+
+    # Build chart
     fig = go.Figure()
-    for label, data, color in [("Period 2", period2, "#6366f1"), ("Period 3", period3, "#10b981")]:
-        names = list(data.keys())
-        vals = [data[n][prop] for n in names]
-        fig.add_trace(go.Scatter(x=names, y=vals, mode="lines+markers",
-                                  name=label, line=dict(color=color, width=2),
-                                  marker=dict(size=10, color=color)))
-    fig.update_layout(height=400, xaxis_title="Element", yaxis_title=f"{prop} ({unit})",
-                      margin=dict(l=20, r=20, t=20, b=20), hovermode="x unified")
+    colors_list = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"]
+
+    def add_set_to_fig(fig, label, elements_list, color, prop, chart_type, idx=0):
+        names = elements_list
+        vals = [ELEMENTS[n][prop] for n in names]
+        dash = "dot" if idx == 1 else "solid"
+        if chart_type == "Bar chart":
+            offset = -0.2 if idx == 0 else 0.2
+            fig.add_trace(go.Bar(
+                x=names, y=vals, name=label,
+                marker_color=color, opacity=0.85,
+                offset=offset,
+                text=[f"{v:.2f}" for v in vals],
+                textposition="outside",
+                hovertemplate=f"<b>%{{x}}</b><br>{prop}: %{{y:.2f}} {unit}<extra>{label}</extra>",
+            ))
+        else:
+            marker = dict(size=10, color=color, symbol="circle" if idx == 0 else "diamond")
+            fig.add_trace(go.Scatter(
+                x=names, y=vals, mode="lines+markers",
+                name=label, line=dict(color=color, width=2, dash=dash),
+                marker=marker,
+                hovertemplate=f"<b>%{{x}}</b><br>{prop}: %{{y:.2f}} {unit}<extra>{label}</extra>",
+            ))
+
+    add_set_to_fig(fig, set1_label, set_elements[set1_label],
+                   group_colors.get(set1_label, colors_list[0]), prop, chart_type, 0)
+
+    if set2_label:
+        add_set_to_fig(fig, set2_label, set_elements[set2_label],
+                       group_colors.get(set2_label, colors_list[1]), prop, chart_type, 1)
+
+    fig.update_layout(
+        height=450,
+        xaxis_title="Element",
+        yaxis_title=f"{prop} ({unit})",
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font_color="#ccc",
+        hovermode="x unified",
+        barmode="group",
+        margin=dict(l=10, r=10, t=10, b=30),
+    )
     st.plotly_chart(fig, use_container_width=True)
 
-    decrease_across = "Radius" in trend
-    st.info(
-        f"💡 **Trend:** {prop} generally "
-        f"{'decreases' if decrease_across else 'increases'} across a period "
-        f"(left → right) and "
-        f"{'increases' if decrease_across else 'decreases'} down a group (top → bottom)."
-    )
+    # Trend description
+    decreasing = ["Atomic Radius"]
+    if prop in decreasing:
+        trend_dir = f"decreases across a period (L→R) and increases down a group (top→bottom)"
+    elif prop == "Ionization Energy":
+        trend_dir = f"generally increases across a period (L→R) and decreases down a group (top→bottom)"
+    elif prop == "Electronegativity":
+        trend_dir = f"increases across a period (L→R) and decreases down a group (top→bottom)"
+    else:
+        trend_dir = f"varies; generally more negative (exothermic) for halogens, least for noble gases"
+
+    st.info(f"💡 **{prop} Trend:** {trend_dir}.")
+
+    if set2_label:
+        st.markdown(f"📊 **{set1_label}** vs **{set2_label}** — values shown side by side for comparison.")
 
 # ================================================================
 #                    ⚡ ENTHALPY PROFILE
