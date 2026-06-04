@@ -44,7 +44,7 @@ topic_map = {
         "⚛️ Lattice Energy",
         "🧿 Gibbs Free Energy",
     ],
-    "📖 Notes": ["Qualitative Analysis"],
+    "📖 Notes": ["Qualitative Analysis", "Electrolysis"],
 }
 
 topic = st.sidebar.radio("Topic", topic_map[category])
@@ -1123,6 +1123,113 @@ elif topic == "🧿 Gibbs Free Energy":
                 st.info(f"🟢 Spontaneous below {t_crit:.0f} K | 🔴 Non-spontaneous above")
             else:
                 st.info(f"🔴 Non-spontaneous below {t_crit:.0f} K | 🟢 Spontaneous above")
+
+# ================================================================
+#                     🔋 ELECTROLYSIS
+# ================================================================
+elif topic == "Electrolysis":
+    st.markdown("## 🔋 Electrolysis — Comparison Table")
+    st.markdown("Comparing electrolysis of dilute HCl, NaCl(aq), and concentrated NaCl.")
+
+    st.markdown("### Ions Present")
+    col1, col2, col3, col4 = st.columns([1.2, 1.8, 1.8, 1.8])
+    col1.markdown("**Ion**")
+    col2.markdown("**Dilute HCl**")
+    col3.markdown("**NaCl (aq)**")
+    col4.markdown("**Concentrated NaCl**")
+    col1, col2, col3, col4 = st.columns([1.2, 1.8, 1.8, 1.8])
+    col1.markdown("Cation")
+    col2.markdown("H⁺")
+    col3.markdown("H⁺, Na⁺")
+    col4.markdown("H⁺, Na⁺")
+    col1, col2, col3, col4 = st.columns([1.2, 1.8, 1.8, 1.8])
+    col1.markdown("Anion")
+    col2.markdown("OH⁻, Cl⁻")
+    col3.markdown("OH⁻, Cl⁻")
+    col4.markdown("OH⁻, Cl⁻")
+
+    st.divider()
+    st.markdown("### Ions Discharged")
+
+    st.markdown("**Cathode**")
+    st.latex(r"2H^+(aq) + 2e^- \rightarrow H_2(g)")
+    st.markdown("— applies to **all three** electrolytes")
+
+    st.markdown("**Anode**")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("**Dilute HCl**")
+        st.latex(r"4OH^-(aq) \rightarrow 2H_2O(l) + O_2(g) + 4e^-")
+    with c2:
+        st.markdown("**NaCl (aq)**")
+        st.latex(r"2Cl^-(aq) \rightarrow Cl_2(g) + 2e^-")
+    with c3:
+        st.markdown("**Conc. NaCl**")
+        st.latex(r"2Cl^-(aq) \rightarrow Cl_2(g) + 2e^-")
+
+    st.divider()
+    st.markdown("### Overall Equation")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("**Dilute HCl**")
+        st.latex(r"2H_2O(l) \rightarrow 2H_2(g) + O_2(g)")
+    with c2:
+        st.markdown("**NaCl (aq)**")
+        st.latex(r"2Cl^- + 2H_2O \rightarrow H_2 + Cl_2 + 2OH^-")
+    with c3:
+        st.markdown("**Conc. NaCl**")
+        st.latex(r"2Cl^- + 2H_2O \rightarrow H_2 + Cl_2 + 2OH^-")
+
+    st.divider()
+    st.markdown("### Products")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("**Dilute HCl**")
+        st.markdown("- Hydrogen gas")
+        st.markdown("- Oxygen gas")
+    with c2:
+        st.markdown("**NaCl (aq)**")
+        st.markdown("- Hydrogen gas")
+        st.markdown("- Chlorine gas")
+        st.markdown("- Sodium hydroxide")
+    with c3:
+        st.markdown("**Conc. NaCl**")
+        st.markdown("- Hydrogen gas")
+        st.markdown("- Chlorine gas")
+        st.markdown("- Sodium hydroxide")
+
+    st.divider()
+    st.markdown("### Observations")
+
+    st.markdown("**Cathode (all)**")
+    st.markdown("- Bubbles of hydrogen gas")
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("**Anode — Dilute HCl**")
+        st.markdown("- Bubbles of oxygen gas")
+        st.markdown("- Volume of O₂ is half that of H₂")
+    with c2:
+        st.markdown("**Anode — NaCl (aq)**")
+        st.markdown("- Bubbles of yellowish-green gas (Cl₂)")
+        st.markdown("- Volume of Cl₂ same as H₂")
+    with c3:
+        st.markdown("**Anode — Conc. NaCl**")
+        st.markdown("- Bubbles of yellowish-green gas (Cl₂)")
+        st.markdown("- Volume of Cl₂ same as H₂")
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("**Electrolyte — Dilute HCl**")
+        st.markdown("- Concentration of acid increases")
+    with c2:
+        st.markdown("**Electrolyte — NaCl (aq)**")
+        st.markdown("- Concentration of NaCl increases")
+        st.markdown("- pH remains constant")
+    with c3:
+        st.markdown("**Electrolyte — Conc. NaCl**")
+        st.markdown("- Formation of NaOH")
+        st.markdown("- pH increases")
 
 # ================================================================
 #                     📖 QUALITATIVE ANALYSIS
