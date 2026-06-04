@@ -1178,7 +1178,7 @@ elif topic == "Electrolysis":
     html += """<tr>
         <td style="border:1px solid #444;padding:8px 10px;background:#1a1a2e;font-weight:600;">Cathode</td>
         <td colspan="3" style="border:1px solid #444;padding:8px 10px;text-align:center;">
-            $$2H^+(aq) + 2e^- \\rightarrow H_2(g)$$<br><small>Same for all — bubbles of H₂ gas</small>
+            2H⁺(aq) + 2e⁻ → H₂(g)<br><small>Same for all — bubbles of H₂ gas</small>
         </td>
     </tr>"""
 
