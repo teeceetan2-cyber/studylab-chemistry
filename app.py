@@ -44,7 +44,7 @@ topic_map = {
         "⚛️ Lattice Energy",
         "🧿 Gibbs Free Energy",
     ],
-    "📖 Notes": ["Qualitative Analysis", "Electrolysis", "Reactivity Series"],
+    "📖 Notes": ["Qualitative Analysis", "Electrolysis", "Reactivity Series", "Redox Tests"],
 }
 
 topic = st.sidebar.radio("Topic", topic_map[category])
@@ -1312,6 +1312,56 @@ elif topic == "Reactivity Series":
     *** Extremely slow reaction that stops gradually due to the formation of PbCl₂.
     </small>
     """, unsafe_allow_html=True)
+
+# ================================================================
+#                     🧪 REDOX TESTS
+# ================================================================
+elif topic == "Redox Tests":
+    st.markdown("## 🧪 Test for Reducing & Oxidising Agents")
+
+    html = """<table style="width:100%;border-collapse:collapse;font-size:14px;">
+    <tr style="background:#c45508;">
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;color:white;">Test for</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;color:white;">Reagent needed</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;color:white;">Test reagent</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;color:white;">Initial colour</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;color:white;">Final colour</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;color:white;">Explanation</th>
+    </tr>
+    <tr>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;font-weight:600;" rowspan="2">Reducing agent</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;" rowspan="2">Oxidising agent</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;">Acidified KMnO₄ / H⁺</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;background:#6a0dad;color:white;">Purple</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;">Colourless</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:left;">
+            Manganate(VII) ions are reduced by the reducing agent.<br>
+            <i>MnO₄⁻(aq) + 8H⁺(aq) + 5e⁻ → Mn²⁺(aq) + 4H₂O(l)</i>
+        </td>
+    </tr>
+    <tr>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;">Acidified K₂Cr₂O₇ / H⁺</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;background:#ff8c00;color:white;">Orange</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;background:#006400;color:white;">Green</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:left;">
+            Dichromate(VI) ions are reduced by the reducing agent.<br>
+            <i>Cr₂O₇²⁻(aq) + 14H⁺(aq) + 6e⁻ → 2Cr³⁺(aq) + 7H₂O(l)</i>
+        </td>
+    </tr>
+    <tr>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;font-weight:600;">Oxidising agent</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;">Reducing agent</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;">Aqueous KI</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;">Colourless</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;background:#8b4513;color:white;">Brown</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:left;">
+            Iodide ions are oxidised by the oxidising agent.<br>
+            <i>2I⁻(aq) → I₂(aq) + 2e⁻</i>
+        </td>
+    </tr>
+    </table>"""
+    st.markdown(html, unsafe_allow_html=True)
+
 # ================================================================
 elif topic == "Qualitative Analysis":
     st.markdown("## 📖 Qualitative Analysis — Summary of Tests")
