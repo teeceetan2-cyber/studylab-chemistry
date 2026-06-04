@@ -309,13 +309,16 @@ elif topic == "Periodic Trend Explorer":
         "Group 6A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "6A"],
         "Group 7A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "7A"],
         "Group 8A": [sym for sym, d in ELEMENTS.items() if d["Group"] == "8A"],
+        "Period 2": [sym for sym, d in ELEMENTS.items() if d["Period"] == 2],
+        "Period 3": [sym for sym, d in ELEMENTS.items() if d["Period"] == 3],
         "Period 4": [sym for sym, d in ELEMENTS.items() if d["Period"] == 4],
     }
 
     group_colors = {
         "Group 1A": "#e74c3c", "Group 2A": "#f39c12", "Group 3A": "#2ecc71",
         "Group 4A": "#1abc9c", "Group 5A": "#3498db", "Group 6A": "#9b59b6",
-        "Group 7A": "#e67e22", "Group 8A": "#95a5a6", "Period 4": "#6366f1",
+        "Group 7A": "#e67e22", "Group 8A": "#95a5a6", "Period 2": "#a78bfa",
+        "Period 3": "#f472b6", "Period 4": "#6366f1",
     }
 
     col1, col2 = st.columns([2, 1])
