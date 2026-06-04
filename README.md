@@ -1,4 +1,4 @@
-# 🧪 StudyLab — Chemistry
+# 🧪 StudyLab — Chemistry (Verified Access)
 
 Interactive chemistry tools built with Streamlit.
 
