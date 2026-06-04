@@ -28,6 +28,7 @@ category = st.sidebar.selectbox("Category", [
     "💨 Gas Laws",
     "🔬 Periodic Table",
     "🔥 Energetics",
+    "📖 Notes",
 ])
 
 topic_map = {
@@ -43,6 +44,7 @@ topic_map = {
         "⚛️ Lattice Energy",
         "🧿 Gibbs Free Energy",
     ],
+    "📖 Notes": ["Qualitative Analysis"],
 }
 
 topic = st.sidebar.radio("Topic", topic_map[category])
@@ -1118,6 +1120,85 @@ elif topic == "🧿 Gibbs Free Energy":
                 st.info(f"🟢 Spontaneous below {t_crit:.0f} K | 🔴 Non-spontaneous above")
             else:
                 st.info(f"🔴 Non-spontaneous below {t_crit:.0f} K | 🟢 Spontaneous above")
+
+# ================================================================
+#                     📖 QUALITATIVE ANALYSIS
+# ================================================================
+elif topic == "Qualitative Analysis":
+    st.markdown("## 📖 Qualitative Analysis — Summary of Tests")
+    st.markdown("Reference chart for identifying cations and anions based on reactions with common reagents.")
+
+    col_n, col_a = st.columns([4, 1])
+    with col_n:
+        st.markdown("### NaOH(aq)")
+    with col_a:
+        st.markdown("*Excess NaOH*")
+    naoh_data = [
+        ("Na⁺", "No precipitate", "N/A"),
+        ("K⁺", "No precipitate", "N/A"),
+        ("NH₄⁺", "NH₃ gas evolved on warming", "N/A"),
+        ("Ca²⁺", "White", "Insoluble"),
+        ("Zn²⁺", "White", "Soluble"),
+        ("Pb²⁺", "White", "Soluble"),
+        ("Al³⁺", "White", "Soluble"),
+        ("Cu²⁺", "Blue", "Insoluble"),
+        ("Fe²⁺", "Green → turns reddish-brown on standing", "N/A"),
+        ("Fe³⁺", "Reddish-brown", "Insoluble"),
+    ]
+    na_cols = st.columns([1, 2, 1])
+    na_cols[0].markdown("**Cation**")
+    na_cols[1].markdown("**Precipitate with NaOH(aq)**")
+    na_cols[2].markdown("**In xs NaOH**")
+    for ion, ppt, xs in naoh_data:
+        c1, c2, c3 = st.columns([1, 2, 1])
+        c1.markdown(f"`{ion}`")
+        c2.markdown(ppt)
+        c3.markdown(xs)
+
+    st.divider()
+
+    col_nh, col_a2 = st.columns([4, 1])
+    with col_nh:
+        st.markdown("### NH₃(aq)")
+    with col_a2:
+        st.markdown("*Excess NH₃*")
+    nh3_data = [
+        ("Na⁺", "No precipitate", "N/A"),
+        ("K⁺", "No precipitate", "N/A"),
+        ("NH₄⁺", "No precipitate", "N/A"),
+        ("Ca²⁺", "White", "Insoluble"),
+        ("Zn²⁺", "White", "Soluble"),
+        ("Pb²⁺", "White", "Insoluble"),
+        ("Al³⁺", "White", "Insoluble"),
+        ("Cu²⁺", "Blue", "Soluble → dark blue solution"),
+        ("Fe²⁺", "Green → turns reddish-brown on standing", "Insoluble"),
+        ("Fe³⁺", "Reddish-brown", "Insoluble"),
+    ]
+    nh_cols = st.columns([1, 2, 1])
+    nh_cols[0].markdown("**Cation**")
+    nh_cols[1].markdown("**Precipitate with NH₃(aq)**")
+    nh_cols[2].markdown("**In xs NH₃**")
+    for ion, ppt, xs in nh3_data:
+        c1, c2, c3 = st.columns([1, 2, 1])
+        c1.markdown(f"`{ion}`")
+        c2.markdown(ppt)
+        c3.markdown(xs)
+
+    st.divider()
+
+    st.markdown("### Dilute Acid (HCl, H₂SO₄)")
+    st.markdown("**Effervescence observed?**")
+    c_a, c_b = st.columns(2)
+    with c_a:
+        st.markdown("✅ **Yes** — gas evolved")
+        st.markdown("- **H₂** → Metal present")
+        st.markdown("- **CO₂** → CO₃²⁻ (carbonate) present")
+        st.markdown("- **SO₂** → SO₃²⁻ (sulfite) present")
+    with c_b:
+        st.markdown("❌ **No** — no effervescence")
+        st.markdown("- No reactive metal, carbonate, or sulfite detected")
+
+    st.caption("Source: chemlectures.sg · Page 11 · www.chemlectures.sg")
 
 # ── FOOTER ────────────────────────────────────────────────
 st.markdown("---")
