@@ -1191,6 +1191,67 @@ elif topic == "Electrolysis":
     html += "</table>"
     st.markdown(html, unsafe_allow_html=True)
 
+    st.divider()
+    st.markdown("### 📊 Electrochemical Series — Order of Discharge")
+
+    anion_html = """<table style="width:100%;border-collapse:collapse;font-size:14px;">
+    <tr style="background:#1a1a2e;">
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;">Anion</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;">Order of Discharge</th>
+    </tr>
+    <tr>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;font-weight:600;">OH⁻</td>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;">Usually first</td>
+    </tr>
+    <tr>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;font-weight:600;">I⁻</td>
+        <td rowspan="3" style="border:1px solid #444;padding:8px 10px;text-align:center;">Discharged first if present<br>in high concentrations</td>
+    </tr>
+    <tr><td style="border:1px solid #444;padding:8px 10px;text-align:center;font-weight:600;">Br⁻</td></tr>
+    <tr><td style="border:1px solid #444;padding:8px 10px;text-align:center;font-weight:600;">Cl⁻</td></tr>
+    <tr>
+        <td style="border:1px solid #444;padding:8px 10px;text-align:center;font-weight:600;">CO₃²⁻</td>
+        <td rowspan="3" style="border:1px solid #444;padding:8px 10px;text-align:center;">Never discharged</td>
+    </tr>
+    <tr><td style="border:1px solid #444;padding:8px 10px;text-align:center;font-weight:600;">SO₄²⁻</td></tr>
+    <tr><td style="border:1px solid #444;padding:8px 10px;text-align:center;font-weight:600;">NO₃⁻</td></tr>
+    </table>"""
+    st.markdown(anion_html, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    cations = [
+        ("K⁺", "Not discharged"),
+        ("Na⁺", "Not discharged"),
+        ("Ca²⁺", "Not discharged"),
+        ("Mg²⁺", "Not discharged"),
+        ("Al³⁺", "Not discharged"),
+        ("Zn²⁺", "Not discharged"),
+        ("Fe²⁺", "Not discharged"),
+        ("Pb²⁺", "Not discharged"),
+        ("H⁺", "H₂ discharged"),
+        ("Cu²⁺", "Metal discharged"),
+        ("Ag⁺", "Metal discharged"),
+        ("Au⁺", "Metal discharged"),
+        ("Pt²⁺", "Metal discharged"),
+    ]
+
+    cation_html = """<table style="width:60%;border-collapse:collapse;font-size:14px;margin:0 auto;">
+    <tr style="background:#1a1a2e;">
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;">Cation</th>
+        <th style="border:1px solid #444;padding:8px 10px;text-align:center;">Discharge Behavior</th>
+    </tr>"""
+    for ion, behavior in cations:
+        bg = "#0f3a2e" if "H₂" in behavior else "#2a1a3e" if "Metal" in behavior else "inherit"
+        cation_html += f"""<tr>
+            <td style="border:1px solid #444;padding:6px 10px;text-align:center;font-weight:600;">{ion}</td>
+            <td style="border:1px solid #444;padding:6px 10px;text-align:center;background:{bg};">{behavior}</td>
+        </tr>"""
+    cation_html += "</table>"
+    st.markdown(cation_html, unsafe_allow_html=True)
+
+    st.caption("Trend: Top = least likely to discharge · Bottom = most likely to discharge")
+
 # ================================================================
 #                     📖 QUALITATIVE ANALYSIS
 # ================================================================
