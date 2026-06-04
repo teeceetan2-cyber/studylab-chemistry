@@ -35,7 +35,7 @@ topic_map = {
     "⚗️ Acids & Bases": ["pH Calculator"],
     "🧮 Stoichiometry": ["Molar Mass Calculator", "Stoichiometry"],
     "💨 Gas Laws": ["Ideal Gas Law"],
-    "🔬 Periodic Table": ["Periodic Trend Explorer"],
+    "🔬 Periodic Table": ["Periodic Trend Explorer", "Electron Configuration"],
     "🔥 Energetics": [
         "⚡ Enthalpy Profile",
         "🔥 Calorimetry",
@@ -400,6 +400,187 @@ elif topic == "Periodic Trend Explorer":
 
     if set2_label:
         st.markdown(f"📊 **{set1_label}** vs **{set2_label}** — values shown side by side for comparison.")
+
+# ================================================================
+#               ⚛️ ELECTRON CONFIGURATION
+# ================================================================
+elif topic == "Electron Configuration":
+    st.markdown("## ⚛️ Electron Configuration — Bohr & Quantum Models")
+
+    tab_bohr, tab_quantum, tab_config = st.tabs(["Bohr Model", "Quantum Model", "Configuration Builder"])
+
+    with tab_bohr:
+        st.markdown("### Bohr Model (Shells)")
+        st.markdown("Electrons occupy fixed energy levels (shells) around the nucleus.")
+        st.latex(r"E_n = -\frac{13.6}{n^2}~\text{eV} \quad (n = 1, 2, 3, \dots)")
+        st.markdown("**Maximum electrons per shell:**")
+        st.latex(r"\text{Shell } n: 2n^2")
+
+        shells = [(1, "K", 2), (2, "L", 8), (3, "M", 18), (4, "N", 32)]
+        html = """<table style="width:80%;border-collapse:collapse;font-size:14px;margin:0 auto;">
+        <tr style="background:#1a1a2e;">
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Shell (n)</th>
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Label</th>
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Max electrons</th>
+        </tr>"""
+        for n, label, max_e in shells:
+            html += f"""<tr>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">{n}</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">{label}</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">{max_e}</td>
+        </tr>"""
+        html += "</table>"
+        st.markdown(html, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("**Aufbau Principle:** Electrons fill from lowest energy level upwards.")
+        st.markdown("**Rules:**")
+        st.markdown("- Electrons fill lower shells first (1 → 2 → 3 → 4)")
+        st.markdown("- Each shell has a maximum capacity of 2n²")
+        st.markdown("- Example Na (11): 2, 8, 1 — notation Na: [2, 8, 1]")
+
+    with tab_quantum:
+        st.markdown("### Quantum Model (Subshells & Orbitals)")
+        st.markdown("Electrons occupy **orbitals** within subshells (s, p, d, f).")
+        st.latex(r"\text{Pauli Exclusion Principle: no two electrons can have the same four quantum numbers}")
+
+        sub_data = [
+            ("s", 1, 2, "Spherical"),
+            ("p", 3, 6, "Dumbbell"),
+            ("d", 5, 10, "Cloverleaf"),
+            ("f", 7, 14, "Complex"),
+        ]
+        html = """<table style="width:80%;border-collapse:collapse;font-size:14px;margin:0 auto;">
+        <tr style="background:#1a1a2e;">
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Subshell</th>
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Orbitals</th>
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Max e⁻</th>
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Shape</th>
+        </tr>"""
+        for sub, orb, max_e, shape in sub_data:
+            html += f"""<tr>
+            <td style="border:1px solid #444;padding:8px;text-align:center;font-weight:600;">{sub}</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">{orb}</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">{max_e}</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">{shape}</td>
+        </tr>"""
+        html += "</table>"
+        st.markdown(html, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("**Filling Order (Aufbau):**")
+        st.latex(r"1s \rightarrow 2s \rightarrow 2p \rightarrow 3s \rightarrow 3p \rightarrow 4s \rightarrow 3d \rightarrow 4p \rightarrow 5s \rightarrow 4d \rightarrow 5p \rightarrow 6s \rightarrow \dots")
+        st.markdown("**Hund's Rule:** Every orbital in a subshell gets one electron before pairing.")
+        st.markdown("**Quantum Numbers:**")
+        st.markdown("- **n** (principal) — energy level")
+        st.markdown("- **l** (azimuthal) — subshell type: 0=s, 1=p, 2=d, 3=f")
+        st.markdown("- **mₗ** (magnetic) — orbital orientation: –l … 0 … +l")
+        st.markdown("- **mₛ** (spin) — ±½")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("**Periodic Table Blocks:**")
+        html = """<table style="width:80%;border-collapse:collapse;font-size:14px;margin:0 auto;">
+        <tr style="background:#1a1a2e;">
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Block</th>
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Subshell filling</th>
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Groups</th>
+            <th style="border:1px solid #444;padding:8px;text-align:center;">Example</th>
+        </tr>
+        <tr><td style="border:1px solid #444;padding:8px;text-align:center;background:#e74c3c44;font-weight:600;">s-block</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">ns¹⁻²</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">1–2</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">Na: [Ne] 3s¹</td></tr>
+        <tr><td style="border:1px solid #444;padding:8px;text-align:center;background:#f39c1244;font-weight:600;">p-block</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">np¹⁻⁶</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">13–18</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">Cl: [Ne] 3s² 3p⁵</td></tr>
+        <tr><td style="border:1px solid #444;padding:8px;text-align:center;background:#3498db44;font-weight:600;">d-block</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">(n–1)d¹⁻¹⁰</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">3–12</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">Fe: [Ar] 3d⁶ 4s²</td></tr>
+        <tr><td style="border:1px solid #444;padding:8px;text-align:center;background:#2ecc7144;font-weight:600;">f-block</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">(n–2)f¹⁻¹⁴</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">—</td>
+            <td style="border:1px solid #444;padding:8px;text-align:center;">Ce: [Xe] 4f¹ 5d¹ 6s²</td></tr>
+        </table>"""
+        st.markdown(html, unsafe_allow_html=True)
+
+    with tab_config:
+        st.markdown("### Electron Configuration Builder")
+        st.markdown("Enter an atomic number (1–86) to see the electron configuration and orbital diagram.")
+
+        atomic_num = st.number_input("Atomic number (Z)", 1, 86, 11, 1)
+
+        # Aufbau order
+        aufbau = [
+            (1, "1s", 2), (2, "2s", 2), (3, "2p", 6), (4, "3s", 2),
+            (5, "3p", 6), (6, "4s", 2), (7, "3d", 10), (8, "4p", 6),
+            (9, "5s", 2), (10, "4d", 10), (11, "5p", 6), (12, "6s", 2),
+            (13, "4f", 14), (14, "5d", 10), (15, "6p", 6),
+        ]
+
+        remaining = atomic_num
+        config = []
+        orbital_diagram = []
+        for _, orbital, cap in aufbau:
+            if remaining <= 0:
+                break
+            fill = min(remaining, cap)
+            config.append(f"{orbital}{{{fill}}}")
+            remaining -= fill
+
+            # Orbital box diagram: each orbital = [↓↑] [↓ ] [↓ ] etc.
+            n_orbitals = cap // 2  # s=1, p=3, d=5, f=7
+            electrons_in_sub = fill
+            boxes = []
+            for o in range(n_orbitals):
+                if electrons_in_sub >= 2:
+                    boxes.append("⇅")
+                    electrons_in_sub -= 2
+                elif electrons_in_sub == 1:
+                    boxes.append("↑")
+                    electrons_in_sub -= 1
+                else:
+                    boxes.append("∎")
+            orbital_diagram.append(f"{orbital}: {' '.join(boxes)}")
+
+        st.success(f"**Configuration:** {' · '.join(config)}")
+        st.markdown("**Orbital diagram:**")
+        for line in orbital_diagram:
+            st.markdown(f"`{line}`")
+
+        # Noble gas shorthand
+        noble_gases = {2: "He", 10: "Ne", 18: "Ar", 36: "Kr", 54: "Xe", 86: "Rn"}
+        ng_core = 0
+        for z, sym in sorted(noble_gases.items()):
+            if z <= atomic_num:
+                ng_core = z
+        if ng_core > 0 and atomic_num > ng_core:
+            rem = atomic_num - ng_core
+            rem_config = []
+            for _, orbital, cap in aufbau:
+                if orbital == "1s":
+                    continue
+                if rem <= 0:
+                    break
+                fill = min(rem, cap)
+                rem_config.append(f"{orbital}{{{fill}}}")
+                rem -= fill
+            ng_sym = noble_gases[ng_core]
+            st.info(f"**Noble gas shorthand:** [{ng_sym}] {' · '.join(rem_config)}")
+        
+        # Bohr diagram
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("**Bohr shell filling:**")
+        rem = atomic_num
+        bohr = []
+        n = 1
+        while rem > 0:
+            cap = min(rem, 2 * n * n)
+            bohr.append(f"n={n}: {cap} e⁻")
+            rem -= cap
+            n += 1
+        st.markdown(" → ".join(bohr))
 
 # ================================================================
 #                    ⚡ ENTHALPY PROFILE
