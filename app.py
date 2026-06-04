@@ -1281,7 +1281,7 @@ elif topic == "Reactivity Series":
         ("Na", "Reacts violently", "NaOH", "Reacts explosively", "Na₂O", "Reacts explosively", "NaCl"),
         ("Ca", "Reacts readily", "Ca(OH)₂", "Reacts explosively", "CaO", "Reacts violently", "CaCl₂"),
         ("Mg", "Reacts very slowly", "Mg(OH)₂", "Reacts violently with a bright white glow", "MgO", "Reacts rapidly", "MgCl₂"),
-        ("Al", "No apparent reaction due to the layer of aluminium oxide", "—", "—", "—", "*Reacts readily", "AlCl₃"),
+        ("Al", "No apparent reaction due to the layer of aluminium oxide", "No reaction", "No apparent reaction due to the layer of aluminium oxide", "No reaction", "*Reacts readily", "AlCl₃"),
         ("Zn", "No reaction", "—", "Reacts readily", "ZnO**", "Reacts moderately fast", "ZnCl₂"),
         ("Fe", "No reaction", "—", "Reacts slowly", "Fe₃O₄", "Reacts slowly", "FeCl₂"),
         ("Sn", "No reaction", "—", "No reaction", "—", "Reacts very slowly", "SnCl₂"),
