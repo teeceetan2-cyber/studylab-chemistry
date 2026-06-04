@@ -1367,12 +1367,37 @@ elif topic == "Qualitative Analysis":
     st.markdown("## 📖 Qualitative Analysis — Summary of Tests")
     st.markdown("Reference chart for identifying cations and anions based on reactions with common reagents.")
 
-    col_n, col_a = st.columns([4, 1])
-    with col_n:
-        st.markdown("### NaOH(aq)")
-    with col_a:
-        st.markdown("*Excess NaOH*")
-    naoh_data = [
+    def ppt_bg(text):
+        m = {"White": "#f0f0f0", "Blue": "#1e90ff", "Green": "#2e8b57",
+             "Reddish-brown": "#a0522d", "No precipitate": None}
+        for k, v in m.items():
+            if k in text:
+                return v
+        return None
+
+    def build_table(title, subtitle, data, caption=""):
+        html = f"""<p style="font-size:1.1rem;font-weight:600;margin:10px 0 2px;">{title}</p>
+<p style="font-size:0.85rem;color:#888;margin:0 0 8px;">{subtitle}</p>
+<table style="width:100%;border-collapse:collapse;font-size:14px;">
+<tr style="background:#1a1a2e;">
+    <th style="border:1px solid #444;padding:8px 10px;text-align:center;">Cation</th>
+    <th style="border:1px solid #444;padding:8px 10px;text-align:center;">Precipitate</th>
+    <th style="border:1px solid #444;padding:8px 10px;text-align:center;">In excess</th>
+</tr>"""
+        for ion, ppt, xs in data:
+            bg = ppt_bg(ppt)
+            bg_style = f'background:{bg};' if bg else ''
+            html += f"""<tr>
+    <td style="border:1px solid #444;padding:6px 10px;text-align:center;font-weight:600;">{ion}</td>
+    <td style="border:1px solid #444;padding:6px 10px;text-align:center;{bg_style}">{ppt}</td>
+    <td style="border:1px solid #444;padding:6px 10px;text-align:center;">{xs}</td>
+</tr>"""
+        html += "</table>"
+        if caption:
+            html += f'<p style="font-size:0.8rem;color:#666;">{caption}</p>'
+        return html
+
+    naoh = [
         ("Na⁺", "No precipitate", "N/A"),
         ("K⁺", "No precipitate", "N/A"),
         ("NH₄⁺", "NH₃ gas evolved on warming", "N/A"),
@@ -1384,24 +1409,7 @@ elif topic == "Qualitative Analysis":
         ("Fe²⁺", "Green → turns reddish-brown on standing", "N/A"),
         ("Fe³⁺", "Reddish-brown", "Insoluble"),
     ]
-    na_cols = st.columns([1, 2, 1])
-    na_cols[0].markdown("**Cation**")
-    na_cols[1].markdown("**Precipitate with NaOH(aq)**")
-    na_cols[2].markdown("**In xs NaOH**")
-    for ion, ppt, xs in naoh_data:
-        c1, c2, c3 = st.columns([1, 2, 1])
-        c1.markdown(f"`{ion}`")
-        c2.markdown(ppt)
-        c3.markdown(xs)
-
-    st.divider()
-
-    col_nh, col_a2 = st.columns([4, 1])
-    with col_nh:
-        st.markdown("### NH₃(aq)")
-    with col_a2:
-        st.markdown("*Excess NH₃*")
-    nh3_data = [
+    nh3 = [
         ("Na⁺", "No precipitate", "N/A"),
         ("K⁺", "No precipitate", "N/A"),
         ("NH₄⁺", "No precipitate", "N/A"),
@@ -1413,28 +1421,21 @@ elif topic == "Qualitative Analysis":
         ("Fe²⁺", "Green → turns reddish-brown on standing", "Insoluble"),
         ("Fe³⁺", "Reddish-brown", "Insoluble"),
     ]
-    nh_cols = st.columns([1, 2, 1])
-    nh_cols[0].markdown("**Cation**")
-    nh_cols[1].markdown("**Precipitate with NH₃(aq)**")
-    nh_cols[2].markdown("**In xs NH₃**")
-    for ion, ppt, xs in nh3_data:
-        c1, c2, c3 = st.columns([1, 2, 1])
-        c1.markdown(f"`{ion}`")
-        c2.markdown(ppt)
-        c3.markdown(xs)
+
+    st.markdown(build_table("NaOH(aq)", "Excess NaOH", naoh), unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(build_table("NH₃(aq)", "Excess NH₃", nh3), unsafe_allow_html=True)
 
     st.divider()
-
     st.markdown("### Dilute Acid (HCl, H₂SO₄)")
-    st.markdown("**Effervescence observed?**")
     c_a, c_b = st.columns(2)
     with c_a:
-        st.markdown("✅ **Yes** — gas evolved")
+        st.markdown("✅ **Effervescence observed**")
         st.markdown("- **H₂** → Metal present")
         st.markdown("- **CO₂** → CO₃²⁻ (carbonate) present")
         st.markdown("- **SO₂** → SO₃²⁻ (sulfite) present")
     with c_b:
-        st.markdown("❌ **No** — no effervescence")
+        st.markdown("❌ **No effervescence**")
         st.markdown("- No reactive metal, carbonate, or sulfite detected")
 
     st.caption("Source: chemlectures.sg · Page 11 · www.chemlectures.sg")
