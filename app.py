@@ -1131,23 +1131,48 @@ elif topic == "Electrolysis":
     st.markdown("## 🔋 Electrolysis — Comparison Table")
     st.markdown("Comparing dilute HCl, NaCl(aq), and concentrated NaCl side by side.")
 
+    st.markdown("""
+<style>
+    .elect-cell {
+        border: 1px solid #444;
+        padding: 8px 10px;
+        border-radius: 0;
+        background: #0f0f1a;
+        height: 100%;
+    }
+    .elect-header {
+        background: #1a1a2e;
+        border: 1px solid #444;
+        padding: 8px 10px;
+        font-weight: 700;
+        text-align: center;
+    }
+    .elect-label {
+        border: 1px solid #444;
+        padding: 8px 10px;
+        background: #1a1a2e;
+        font-weight: 600;
+    }
+</style>
+""", unsafe_allow_html=True)
+
     header = st.columns([1.3, 1.8, 1.8, 1.8])
-    header[0].markdown("")
-    header[1].markdown("**Dilute HCl**")
-    header[2].markdown("**NaCl (aq)**")
-    header[3].markdown("**Conc. NaCl**")
+    header[0].markdown('<div class="elect-header">Electrolyte</div>', unsafe_allow_html=True)
+    header[1].markdown('<div class="elect-header">Dilute HCl</div>', unsafe_allow_html=True)
+    header[2].markdown('<div class="elect-header">NaCl (aq)</div>', unsafe_allow_html=True)
+    header[3].markdown('<div class="elect-header">Conc. NaCl</div>', unsafe_allow_html=True)
 
     def row(label, *vals):
         cols = st.columns([1.3, 1.8, 1.8, 1.8])
-        cols[0].markdown(f"**{label}**")
+        cols[0].markdown(f'<div class="elect-label">{label}</div>', unsafe_allow_html=True)
         for i, v in enumerate(vals):
-            cols[i+1].markdown(v)
+            cols[i+1].markdown(f'<div class="elect-cell">{v}</div>', unsafe_allow_html=True)
 
     def row_latex(label, *vals):
         cols = st.columns([1.3, 1.8, 1.8, 1.8])
-        cols[0].markdown(f"**{label}**")
+        cols[0].markdown(f'<div class="elect-label">{label}</div>', unsafe_allow_html=True)
         for i, v in enumerate(vals):
-            cols[i+1].latex(v)
+            cols[i+1].markdown(f'<div class="elect-cell">${v}$</div>', unsafe_allow_html=True)
 
     st.divider()
     row("Cation", "H⁺", "H⁺, Na⁺", "H⁺, Na⁺")
