@@ -1277,15 +1277,15 @@ elif topic == "Reactivity Series":
     </tr>"""
 
     metals = [
-        ("K", "Explosively", "KOH", "Explosively", "K₂O", "Explosively", "KCl"),
-        ("Na", "Violently", "NaOH", "Violently", "Na₂O", "Violently", "NaCl"),
-        ("Ca", "Readily", "Ca(OH)₂", "Readily", "CaO", "Readily", "CaCl₂"),
-        ("Mg", "Very slowly", "Mg(OH)₂", "Violently (bright white glow)", "MgO", "Rapidly", "MgCl₂"),
-        ("Al", "No apparent reaction*", "—", "—", "—", "Readily*", "AlCl₃"),
-        ("Zn", "—", "—", "Readily", "ZnO**", "Moderately fast", "ZnCl₂"),
-        ("Fe", "—", "—", "Slowly", "Fe₃O₄", "Slowly", "FeCl₂"),
-        ("Sn", "—", "—", "—", "—", "Very slowly", "SnCl₂"),
-        ("Pb", "—", "—", "—", "—", "No apparent reaction***", "—"),
+        ("K", "Reacts explosively", "KOH", "Reacts explosively", "K₂O", "Reacts explosively", "KCl"),
+        ("Na", "Reacts violently", "NaOH", "Reacts explosively", "Na₂O", "Reacts explosively", "NaCl"),
+        ("Ca", "Reacts readily", "Ca(OH)₂", "Reacts explosively", "CaO", "Reacts violently", "CaCl₂"),
+        ("Mg", "Reacts very slowly", "Mg(OH)₂", "Reacts violently with a bright white glow", "MgO", "Reacts rapidly", "MgCl₂"),
+        ("Al", "No apparent reaction due to the layer of aluminium oxide", "—", "—", "—", "*Reacts readily", "AlCl₃"),
+        ("Zn", "No reaction", "—", "Reacts readily", "ZnO**", "Reacts moderately fast", "ZnCl₂"),
+        ("Fe", "No reaction", "—", "Reacts slowly", "Fe₃O₄", "Reacts slowly", "FeCl₂"),
+        ("Sn", "No reaction", "—", "No reaction", "—", "Reacts very slowly", "SnCl₂"),
+        ("Pb", "No reaction", "—", "No reaction", "—", "***No apparent reaction due to the insoluble layer of lead(II) chloride", "—"),
         ("Cu", "No reaction", "—", "No reaction", "—", "No reaction", "—"),
         ("Ag", "No reaction", "—", "No reaction", "—", "No reaction", "—"),
         ("Au", "No reaction", "—", "No reaction", "—", "No reaction", "—"),
@@ -1309,7 +1309,7 @@ elif topic == "Reactivity Series":
     <small>
     * Dilute HCl dissolves the oxide layer, allowing underlying Al to react.<br>
     ** ZnO is yellow when hot and white when cold.<br>
-    *** Extremely slow reaction that stops due to formation of PbCl₂ layer.
+    *** Extremely slow reaction that stops gradually due to the formation of PbCl₂.
     </small>
     """, unsafe_allow_html=True)
 # ================================================================
