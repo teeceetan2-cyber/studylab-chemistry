@@ -44,7 +44,7 @@ topic_map = {
         "⚛️ Lattice Energy",
         "🧿 Gibbs Free Energy",
     ],
-    "📖 Notes": ["Qualitative Analysis", "Electrolysis"],
+    "📖 Notes": ["Qualitative Analysis", "Electrolysis", "Reactivity Series"],
 }
 
 topic = st.sidebar.radio("Topic", topic_map[category])
@@ -1253,7 +1253,65 @@ elif topic == "Electrolysis":
     st.caption("Trend: Top = least likely to discharge · Bottom = most likely to discharge")
 
 # ================================================================
-#                     📖 QUALITATIVE ANALYSIS
+#                     🔥 REACTIVITY SERIES
+# ================================================================
+elif topic == "Reactivity Series":
+    st.markdown("## 🔥 Reactivity Series — Metals with Water & Acid")
+    st.markdown("Reactivity decreases from top to bottom.")
+
+    html = """<table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <tr style="background:#1a1a2e;">
+        <th style="border:1px solid #444;padding:8px 6px;text-align:center;">Metal</th>
+        <th style="border:1px solid #444;padding:8px 6px;text-align:center;" colspan="2">Cold Water</th>
+        <th style="border:1px solid #444;padding:8px 6px;text-align:center;" colspan="2">Steam</th>
+        <th style="border:1px solid #444;padding:8px 6px;text-align:center;" colspan="2">Dilute HCl</th>
+    </tr>
+    <tr style="background:#1a1a2e;">
+        <th style="border:1px solid #444;padding:4px 6px;"></th>
+        <th style="border:1px solid #444;padding:4px 6px;text-align:center;">Observation</th>
+        <th style="border:1px solid #444;padding:4px 6px;text-align:center;">Forms H₂ &</th>
+        <th style="border:1px solid #444;padding:4px 6px;text-align:center;">Observation</th>
+        <th style="border:1px solid #444;padding:4px 6px;text-align:center;">Forms H₂ &</th>
+        <th style="border:1px solid #444;padding:4px 6px;text-align:center;">Observation</th>
+        <th style="border:1px solid #444;padding:4px 6px;text-align:center;">Forms H₂ &</th>
+    </tr>"""
+
+    metals = [
+        ("K", "Explosively", "KOH", "Explosively", "K₂O", "Explosively", "KCl"),
+        ("Na", "Violently", "NaOH", "Violently", "Na₂O", "Violently", "NaCl"),
+        ("Ca", "Readily", "Ca(OH)₂", "Readily", "CaO", "Readily", "CaCl₂"),
+        ("Mg", "Very slowly", "Mg(OH)₂", "Violently (bright white glow)", "MgO", "Rapidly", "MgCl₂"),
+        ("Al", "No apparent reaction*", "—", "—", "—", "Readily*", "AlCl₃"),
+        ("Zn", "—", "—", "Readily", "ZnO**", "Moderately fast", "ZnCl₂"),
+        ("Fe", "—", "—", "Slowly", "Fe₃O₄", "Slowly", "FeCl₂"),
+        ("Sn", "—", "—", "—", "—", "Very slowly", "SnCl₂"),
+        ("Pb", "—", "—", "—", "—", "No apparent reaction***", "—"),
+        ("Cu", "No reaction", "—", "No reaction", "—", "No reaction", "—"),
+        ("Ag", "No reaction", "—", "No reaction", "—", "No reaction", "—"),
+        ("Au", "No reaction", "—", "No reaction", "—", "No reaction", "—"),
+    ]
+
+    def _td(v, span=False):
+        s = ' rowspan="2"' if span else ''
+        return f'<td{s} style="border:1px solid #444;padding:6px 8px;text-align:center;">{v}</td>'
+
+    for metal, *cols in metals:
+        html += f'<tr><td style="border:1px solid #444;padding:6px 8px;text-align:center;font-weight:600;">{metal}</td>'
+        for v in cols:
+            html += _td(v)
+        html += "</tr>"
+
+    html += '</table>'
+
+    st.markdown(html, unsafe_allow_html=True)
+
+    st.markdown("""
+    <small>
+    * Dilute HCl dissolves the oxide layer, allowing underlying Al to react.<br>
+    ** ZnO is yellow when hot and white when cold.<br>
+    *** Extremely slow reaction that stops due to formation of PbCl₂ layer.
+    </small>
+    """, unsafe_allow_html=True)
 # ================================================================
 elif topic == "Qualitative Analysis":
     st.markdown("## 📖 Qualitative Analysis — Summary of Tests")
