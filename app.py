@@ -918,6 +918,12 @@ elif topic == "⚛️ Lattice Energy":
 
     # Preset compounds with thermodynamic data (kJ/mol)
     COMPOUNDS = {
+        "Al₂O₃": {
+            "formula": "Al₂O₃", "cation": "Al³⁺", "anion": "O²⁻",
+            "dh_f": -1676, "dh_atom_M": 330, "dh_atom_X": 249,
+            "ie": 5140, "ea": -844, "le": None,
+            "r_cation": 53.5, "r_anion": 140, "z": 3, "n": 7, "A": 4.171,
+        },
         "NaCl": {
             "formula": "NaCl", "cation": "Na⁺", "anion": "Cl⁻",
             "dh_f": -411, "dh_atom_M": 108, "dh_atom_X": 122,
@@ -960,7 +966,9 @@ elif topic == "⚛️ Lattice Energy":
         2 if data["formula"] == "CaCl₂" else 1  # Na₂O: needs different handling
     )
 
-    if data["formula"] == "CaCl₂":
+    if data["formula"] == "Al₂O₃":
+        le_calc = data["dh_f"] - 2 * data["dh_atom_M"] - 2 * data["ie"] - 3 * data["dh_atom_X"] - 3 * data["ea"]
+    elif data["formula"] == "CaCl₂":
         le_calc = data["dh_f"] - data["dh_atom_M"] - data["ie"] - 2 * data["dh_atom_X"] - 2 * data["ea"]
     elif data["formula"] == "Na₂O":
         le_calc = data["dh_f"] - 2 * data["dh_atom_M"] - 2 * data["ie"] - data["dh_atom_X"] - data["ea"]
@@ -984,7 +992,14 @@ elif topic == "⚛️ Lattice Energy":
 
         # Build cycle steps (up to EA only — LE is separate)
         steps = []
-        if data["formula"] == "CaCl₂":
+        if data["formula"] == "Al₂O₃":
+            steps = [
+                ("2 × ΔH_atom(M)", 2 * data["dh_atom_M"], "#10b981"),
+                ("2 × IE", 2 * data["ie"], "#f59e0b"),
+                ("3 × ΔH_atom(X)", 3 * data["dh_atom_X"], "#3b82f6"),
+                ("3 × EA", 3 * data["ea"], "#ef4444"),
+            ]
+        elif data["formula"] == "CaCl₂":
             steps = [
                 ("ΔH_atom(M)", data["dh_atom_M"], "#10b981"),
                 ("IE", data["ie"], "#f59e0b"),
@@ -1150,8 +1165,10 @@ elif topic == "⚛️ Lattice Energy":
             "2 × IE": f"2M(g) → 2{cation}(g) + 2e⁻",
             "ΔH_atom(X)": f"½X₂(g) → X(g)",
             "2 × ΔH_atom(X)": f"X₂(g) → 2X(g)",
+            "3 × ΔH_atom(X)": f"1.5 O₂(g) → 3O(g)",
             "EA": f"X(g) + e⁻ → {anion}(g)",
             "2 × EA": f"2X(g) + 2e⁻ → 2{anion}(g)",
+            "3 × EA": f"3O(g) + 6e⁻ → 3O²⁻(g)",
             "EA (O → O²⁻)": f"O(g) + 2e⁻ → O²⁻(g)",
         }
 
@@ -1164,10 +1181,14 @@ elif topic == "⚛️ Lattice Energy":
                         </div>""", unsafe_allow_html=True)
 
         # Lattice Energy as separate bold step
+        if formula == "Al₂O₃":
+            le_equation = f"2Al³⁺(g) + 3O²⁻(g) → Al₂O₃(s)"
+        else:
+            le_equation = f"{cation}(g) + {anion}(g) → {formula}(s)"
         st.markdown(f"""<div style="background:#8b5cf622;border-left:4px solid #8b5cf6;
                     padding:8px 12px;border-radius:6px;margin:6px 0;">
                     <b style="color:#8b5cf6">Lattice Energy</b>: {le_calc:+.0f} kJ/mol<br>
-                    <span style="color:#aaa;font-size:0.9em">{cation}(g) + {anion}(g) → {formula}(s)</span>
+                    <span style="color:#aaa;font-size:0.9em">{le_equation}</span>
                     </div>""", unsafe_allow_html=True)
 
         step_total = sum(v for _, v, _ in steps)
