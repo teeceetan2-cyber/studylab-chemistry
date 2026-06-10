@@ -28,6 +28,7 @@ category = st.sidebar.selectbox("Category", [
     "💨 Gas Laws",
     "🔬 Periodic Table",
     "🔥 Energetics",
+    "⏱️ Kinetics",
     "📖 Notes",
 ])
 
@@ -45,6 +46,7 @@ topic_map = {
         "🧿 Gibbs Free Energy",
     ],
     "📖 Notes": ["Qualitative Analysis", "Electrolysis", "Reactivity Series", "Redox Tests"],
+    "⏱️ Kinetics": ["Rate of Reaction"],
 }
 
 topic = st.sidebar.radio("Topic", topic_map[category])
@@ -340,6 +342,132 @@ elif topic == "Titration":
     else:
         color, ind = "🟡", "Phenolphthalein (8.3–10.0)"
     st.markdown(f"{color} Suggested: **{ind}**")
+
+# ================================================================
+#                      RATE OF REACTION
+# ================================================================
+elif topic == "Rate of Reaction":
+    st.markdown("## Rate of Reaction — Kinetics")
+
+    order = st.selectbox("Order", ["Zero Order", "First Order", "Second Order"])
+    k = st.number_input("Rate constant k", 0.001, 100.0, 1.0, 0.01,
+                        help="Units vary by order: M/s (0), s⁻¹ (1), M⁻¹s⁻¹ (2)")
+    a0 = st.number_input("Initial [Reactant]", 0.01, 5.0, 1.0, 0.05)
+    p0 = st.number_input("Initial [Product]", 0.0, 5.0, 0.0, 0.05)
+    st.caption("1:1 stoichiometry assumed — [Product] = [A]₀ − [A] + [P]₀")
+
+    t_max = st.slider("Time range", 0.5, 50.0, 10.0, 0.5)
+    t = np.linspace(0, t_max, 400)
+
+    # ── Concentration curves ─────────────────────────────────
+    if order == "Zero Order":
+        a_t = np.maximum(a0 - k * t, 0)
+        p_t = (a0 - a_t) + p0
+        rate_concentration = np.full_like(a_t, k)  # rate vs [A]
+        t_half = a0 / (2 * k) if k > 0 else 0
+        rate_label = f"Rate = {k:.3f} M/s"
+        conc_label = r"$[A] = [A]_0 - kt$"
+    elif order == "First Order":
+        a_t = a0 * np.exp(-k * t)
+        p_t = (a0 - a_t) + p0
+        rate_concentration = k * a_t
+        t_half = math.log(2) / k if k > 0 else 0
+        rate_label = f"Rate = {k:.3f}[A]"
+        conc_label = r"$[A] = [A]_0 e^{-kt}$"
+    else:  # Second Order
+        a_t = a0 / (1 + a0 * k * t)
+        p_t = (a0 - a_t) + p0
+        rate_concentration = k * a_t ** 2
+        t_half = 1 / (k * a0) if k > 0 else 0
+        rate_label = f"Rate = {k:.3f}[A]²"
+        conc_label = r"$1/[A] = 1/[A]_0 + kt$"
+
+    tab1, tab2, tab3 = st.tabs(["📈 Concentration vs Time", "⚡ Rate vs Concentration", "📊 Half-Life & Info"])
+
+    with tab1:
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=t, y=a_t, mode="lines",
+                      line=dict(color="#ef4444", width=3), name="[Reactant]"))
+        fig.add_trace(go.Scatter(x=t, y=p_t, mode="lines",
+                      line=dict(color="#22c55e", width=3), name="[Product]"))
+        fig.add_vline(x=t_half, line=dict(color="#f59e0b", width=2, dash="dash"),
+                      annotation_text=f"t½ = {t_half:.3f}", annotation_position="top left")
+        fig.update_layout(
+            height=380, xaxis_title="Time", yaxis_title="Concentration (M)",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(l=10, r=10, t=20, b=30),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown(
+            f"<div class=\"result-box\"><strong>{order}</strong> — {conc_label}"
+            f"<br>Rate law: {rate_label}</div>",
+            unsafe_allow_html=True,
+        )
+
+    with tab2:
+        rate_vs_a = a_t[a_t > 0.001]  # skip near-zero for clean plot
+        rate_vals = rate_concentration[a_t > 0.001]
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=rate_vs_a, y=rate_vals, mode="lines",
+                      line=dict(color="#8b5cf6", width=3),
+                      name="Rate vs [Reactant]"))
+        fig.update_layout(
+            height=380, xaxis_title="[Reactant] (M)", yaxis_title="Rate (M/s)",
+            margin=dict(l=10, r=10, t=20, b=30),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown(
+            f"<div class=\"result-box\">{rate_label}</div>",
+            unsafe_allow_html=True,
+        )
+
+    with tab3:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Half-life (t½)", f"{t_half:.4f}" if t_half > 0 else "N/A")
+            if order == "Zero Order":
+                st.latex(r"t_{1/2} = \frac{[A]_0}{2k}")
+            elif order == "First Order":
+                st.latex(r"t_{1/2} = \frac{\ln 2}{k}")
+                st.info("t½ is constant — independent of concentration")
+            else:
+                st.latex(r"t_{1/2} = \frac{1}{k[A]_0}")
+                st.info("t½ depends on initial concentration")
+
+        with col2:
+            st.markdown("**Integrated Rate Law**")
+            if order == "Zero Order":
+                st.latex(r"[A] = [A]_0 - kt")
+                st.markdown("**Linear plot:** [A] vs t → slope = −k")
+            elif order == "First Order":
+                st.latex(r"[A] = [A]_0 e^{-kt}")
+                st.markdown("**Linear plot:** ln[A] vs t → slope = −k")
+            else:
+                st.latex(r"\frac{1}{[A]} = \frac{1}{[A]_0} + kt")
+                st.markdown("**Linear plot:** 1/[A] vs t → slope = +k")
+
+        # Linearized plot
+        st.markdown("**Linearized Plot**")
+        a_pos = a_t[a_t > 0.001]
+        t_pos = t[a_t > 0.001]
+        if order == "Zero Order":
+            y_lin = a_pos
+            y_label = "[A] (M)"
+        elif order == "First Order":
+            y_lin = np.log(a_pos)
+            y_label = "ln[A]"
+        else:
+            y_lin = 1.0 / a_pos
+            y_label = "1/[A] (M⁻¹)"
+        fig2 = go.Figure()
+        fig2.add_trace(go.Scatter(x=t_pos, y=y_lin, mode="lines",
+                        line=dict(color="#f97316", width=3)))
+        fig2.update_layout(
+            height=300, xaxis_title="Time", yaxis_title=y_label,
+            margin=dict(l=10, r=10, t=10, b=30),
+        )
+        st.plotly_chart(fig2, use_container_width=True)
 
 # ================================================================
 #                     MOLAR MASS CALCULATOR
