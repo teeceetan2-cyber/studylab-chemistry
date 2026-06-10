@@ -135,132 +135,199 @@ if topic == "pH Calculator":
 elif topic == "Titration":
     st.markdown("## Titration Curve & pH Calculator")
 
-    acid_type = st.selectbox("Acid type", ["Strong Acid + Strong Base", "Weak Acid + Strong Base"])
-    pka = st.number_input("pKₐ of weak acid", 0.0, 14.0, 4.76, 0.01,
-                          help="Only used for weak acid (default: acetic acid)")
-    ca = st.number_input("Acid concentration (M)", 0.001, 2.0, 0.1, 0.01)
-    va = st.number_input("Acid volume (mL)", 1.0, 100.0, 25.0, 0.5)
-    cb = st.number_input("Base concentration (M)", 0.001, 2.0, 0.1, 0.01)
+    tt = st.selectbox("Titration type", [
+        "Strong Acid + Strong Base",
+        "Weak Acid + Strong Base",
+        "Strong Base + Strong Acid",
+        "Weak Base + Strong Acid",
+    ])
 
-    veq = ca * va / cb  # equivalence volume in mL
-    vb_max = max(veq * 2.5, 20.0)
-    vb = st.slider("Base added (mL)", 0.0, vb_max, veq / 2, 0.1)
+    # Determine roles
+    is_base_titrant = tt in ["Strong Acid + Strong Base", "Weak Acid + Strong Base"]
+    is_weak_analyte = tt in ["Weak Acid + Strong Base", "Weak Base + Strong Acid"]
 
-    # Calculate moles
-    mol_acid = ca * va / 1000
-    mol_base = cb * vb / 1000
-    total_v = (va + vb) / 1000  # L
+    if is_base_titrant:
+        # Analyte = acid, titrant = base
+        ca = st.number_input("Acid concentration (M)", 0.001, 2.0, 0.1, 0.01)
+        va = st.number_input("Acid volume (mL)", 1.0, 100.0, 25.0, 0.5)
+        cb = st.number_input("Base concentration (M)", 0.001, 2.0, 0.1, 0.01)
+        if is_weak_analyte:
+            pka = st.number_input("pKₐ of weak acid", 0.0, 14.0, 4.76, 0.01,
+                                  help="Default: acetic acid (4.76)")
+        veq = ca * va / cb
+        v_added = st.slider("Base added (mL)", 0.0, max(veq * 2.5, 20.0), veq / 2, 0.1)
+        x_label = "Volume of base (mL)"
+        mol_analyte = ca * va / 1000          # mol HA (or H⁺)
+        mol_titrant = cb * v_added / 1000      # mol OH⁻
+        total_v = (va + v_added) / 1000
+        # for weak-acid curve gen loop
+        c_analyte = ca
+        v_analyte = va
+    else:
+        # Analyte = base, titrant = acid
+        cb = st.number_input("Base concentration (M)", 0.001, 2.0, 0.1, 0.01)
+        vb = st.number_input("Base volume (mL)", 1.0, 100.0, 25.0, 0.5)
+        ca = st.number_input("Acid concentration (M)", 0.001, 2.0, 0.1, 0.01)
+        if is_weak_analyte:
+            pkb = st.number_input("pKb of weak base", 0.0, 14.0, 4.75, 0.01,
+                                  help="Default: ammonia (4.75)")
+        veq = cb * vb / ca
+        v_added = st.slider("Acid added (mL)", 0.0, max(veq * 2.5, 20.0), veq / 2, 0.1)
+        x_label = "Volume of acid (mL)"
+        mol_analyte = cb * vb / 1000          # mol B (or OH⁻)
+        mol_titrant = ca * v_added / 1000      # mol H⁺
+        total_v = (vb + v_added) / 1000
+        c_analyte = cb
+        v_analyte = vb
 
-    # pH calculation
-    if acid_type == "Strong Acid + Strong Base":
-        if vb == 0:
+    # ── pH calculation ─────────────────────────────────────────
+    excess_analyte = (mol_analyte - mol_titrant) / total_v  # >0 means excess analyte
+    excess_titrant = (mol_titrant - mol_analyte) / total_v  # >0 means excess titrant
+    frac = min(v_added / veq, 1.0) if veq > 0 else 0
+
+    if tt == "Strong Acid + Strong Base":
+        if abs(v_added - veq) < 0.01:
+            ph = 7.0; desc = "Equivalence point — pH = 7"
+        elif v_added < veq:
+            ph = -math.log10(excess_analyte)
+            desc = f"Before equivalence — {frac*100:.0f}% titrated"
+        elif v_added == 0:
             ph = -math.log10(ca)
             desc = "Initial strong acid solution"
-        elif abs(vb - veq) < 0.01:
-            ph = 7.0
-            desc = "Equivalence point — pH = 7"
-        elif vb < veq:
-            excess_h = (mol_acid - mol_base) / total_v
-            ph = -math.log10(excess_h)
-            frac = vb / veq
-            desc = f"Before equivalence — {frac*100:.0f}% titrated"
         else:
-            excess_oh = (mol_base - mol_acid) / total_v
-            ph = 14.0 - (-math.log10(excess_oh))
-            desc = f"After equivalence — {vb - veq:.1f} mL excess base"
-    else:  # Weak Acid + Strong Base
-        if vb == 0:
+            ph = 14.0 + math.log10(excess_titrant)
+            desc = f"After equivalence — {v_added - veq:.1f} mL excess base"
+
+    elif tt == "Weak Acid + Strong Base":
+        if v_added == 0:
             ph = 0.5 * pka - 0.5 * math.log10(ca)
             desc = "Initial weak acid solution"
-        elif abs(vb - veq) < 0.01:
-            # Conjugate base at equivalence
-            cb_eq = mol_acid / total_v  # all acid converted to A⁻
+        elif abs(v_added - veq) < 0.01:
+            cb_eq = ca * va / (va + v_added)  # [A⁻] at eq
             ph = 7.0 + 0.5 * pka + 0.5 * math.log10(cb_eq)
-            desc = "Equivalence point — conjugate base solution"
-        elif vb < veq:
-            # Buffer region: Henderson-Hasselbalch
-            mol_ha = mol_acid - mol_base
-            mol_a = mol_base
-            if mol_ha > 0 and mol_a > 0:
-                ph = pka + math.log10(mol_a / mol_ha)
-            else:
-                ph = pka
-            frac = vb / veq
+            desc = "Equivalence point — conjugate base"
+        elif v_added < veq:
+            mol_a = mol_titrant
+            mol_ha = mol_analyte - mol_titrant
+            ph = pka + math.log10(mol_a / mol_ha) if mol_ha > 0 and mol_a > 0 else pka
             desc = f"Buffer region — {frac*100:.0f}% titrated"
         else:
-            excess_oh = (mol_base - mol_acid) / total_v
-            ph = 14.0 - (-math.log10(excess_oh))
-            desc = f"After equivalence — {vb - veq:.1f} mL excess base"
+            ph = 14.0 + math.log10(excess_titrant)
+            desc = f"After equivalence — {v_added - veq:.1f} mL excess base"
+
+    elif tt == "Strong Base + Strong Acid":
+        if v_added == 0:
+            ph = 14.0 + math.log10(cb)
+            desc = "Initial strong base solution"
+        elif abs(v_added - veq) < 0.01:
+            ph = 7.0; desc = "Equivalence point — pH = 7"
+        elif v_added < veq:
+            ph = 14.0 + math.log10(excess_analyte)
+            desc = f"Before equivalence — {frac*100:.0f}% titrated"
+        else:
+            ph = -math.log10(excess_titrant)
+            desc = f"After equivalence — {v_added - veq:.1f} mL excess acid"
+
+    else:  # Weak Base + Strong Acid
+        pka_conj = 14.0 - pkb
+        if v_added == 0:
+            ph = 14.0 - 0.5 * pkb + 0.5 * math.log10(cb)
+            desc = "Initial weak base solution"
+        elif abs(v_added - veq) < 0.01:
+            cb_eq = cb * vb / (vb + v_added)  # [BH⁺] at eq
+            ph = 7.0 - 0.5 * pkb - 0.5 * math.log10(cb_eq)
+            desc = "Equivalence point — conjugate acid"
+        elif v_added < veq:
+            mol_b = mol_analyte - mol_titrant
+            mol_bh = mol_titrant
+            ph = pka_conj + math.log10(mol_b / mol_bh) if mol_b > 0 and mol_bh > 0 else pka_conj
+            desc = f"Buffer region — {frac*100:.0f}% titrated"
+        else:
+            ph = -math.log10(excess_titrant)
+            desc = f"After equivalence — {v_added - veq:.1f} mL excess acid"
 
     # Results
     col1, col2, col3 = st.columns(3)
     with col1: st.metric("Current pH", f"{ph:.2f}")
     with col2: st.metric("Equivalence volume", f"{veq:.1f} mL")
-    with col3: st.metric("Base added", f"{vb:.1f} mL")
+    with col3: st.metric("Titrant added", f"{v_added:.1f} mL")
     st.caption(desc)
 
     st.divider()
 
-    # Generate full titration curve
-    v_range = np.linspace(0, vb_max, 200)
+    # ── Generate full titration curve ─────────────────────────
+    v_max = max(veq * 2.5, 20.0)
+    v_range = np.linspace(0, v_max, 200)
     ph_curve = []
     for v in v_range:
-        mb = cb * v / 1000
-        tv = (va + v) / 1000
-        if acid_type == "Strong Acid + Strong Base":
-            if v == 0:
-                ph_curve.append(-math.log10(ca))
-            elif abs(v - veq) < 0.001:
-                ph_curve.append(7.0)
-            elif v < veq:
-                ph_curve.append(-math.log10((mol_acid - mb) / tv))
-            else:
-                ph_curve.append(14.0 - (-math.log10((mb - mol_acid) / tv)))
+        if is_base_titrant:
+            mt = cb * v / 1000
+            tv = (va + v) / 1000
+            excess_a = (ca * va / 1000 - mt) / tv
+            excess_t = (mt - ca * va / 1000) / tv
+            mol_ha = ca * va / 1000 - mt
+            mol_a = mt
+            conc_eq_a = ca * va / (va + v)
         else:
-            if v == 0:
-                ph_curve.append(min(0.5 * pka - 0.5 * math.log10(ca), 7.0))
-            elif abs(v - veq) < 0.001:
-                cb_eq_v = mol_acid / tv
-                ph_curve.append(7.0 + 0.5 * pka + 0.5 * math.log10(max(cb_eq_v, 1e-10)))
-            elif v < veq:
-                mha = mol_acid - mb
-                ma_ = mb
-                ph_curve.append(pka + math.log10(ma_ / mha) if mha > 0 and ma_ > 0 else pka)
-            else:
-                ph_curve.append(14.0 - (-math.log10((mb - mol_acid) / tv)))
+            mt = ca * v / 1000
+            tv = (vb + v) / 1000
+            excess_a = (cb * vb / 1000 - mt) / tv
+            excess_t = (mt - cb * vb / 1000) / tv
+            mol_b = cb * vb / 1000 - mt
+            mol_bh = mt
+            conc_eq_b = cb * vb / (vb + v)
 
-    # Clamp extreme values
+        if tt == "Strong Acid + Strong Base":
+            if v == 0: ph_curve.append(-math.log10(ca))
+            elif abs(v - veq) < 0.001: ph_curve.append(7.0)
+            elif v < veq: ph_curve.append(-math.log10(excess_a))
+            else: ph_curve.append(14.0 + math.log10(excess_t))
+        elif tt == "Weak Acid + Strong Base":
+            if v == 0: ph_curve.append(min(0.5 * pka - 0.5 * math.log10(ca), 7.0))
+            elif abs(v - veq) < 0.001:
+                ph_curve.append(7.0 + 0.5 * pka + 0.5 * math.log10(max(conc_eq_a, 1e-10)))
+            elif v < veq:
+                ph_curve.append(pka + math.log10(mol_a / mol_ha) if mol_ha > 0 and mol_a > 0 else pka)
+            else: ph_curve.append(14.0 + math.log10(excess_t))
+        elif tt == "Strong Base + Strong Acid":
+            if v == 0: ph_curve.append(14.0 + math.log10(cb))
+            elif abs(v - veq) < 0.001: ph_curve.append(7.0)
+            elif v < veq: ph_curve.append(14.0 + math.log10(excess_a))
+            else: ph_curve.append(-math.log10(excess_t))
+        else:  # Weak Base + Strong Acid
+            if v == 0: ph_curve.append(min(14.0 - 0.5 * pkb + 0.5 * math.log10(cb), 14.0))
+            elif abs(v - veq) < 0.001:
+                ph_curve.append(7.0 - 0.5 * pkb - 0.5 * math.log10(max(conc_eq_b, 1e-10)))
+            elif v < veq:
+                ph_curve.append(pka_conj + math.log10(mol_b / mol_bh) if mol_b > 0 and mol_bh > 0 else pka_conj)
+            else: ph_curve.append(-math.log10(excess_t))
+
     ph_curve = np.clip(ph_curve, -1, 15)
 
+    # ── Plot ──────────────────────────────────────────────────
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=v_range, y=ph_curve,
-        mode="lines", line=dict(color="#3b82f6", width=3),
-        name="Titration curve",
+        x=v_range, y=ph_curve, mode="lines",
+        line=dict(color="#3b82f6", width=3), name="Titration curve",
     ))
-    # Current point
     fig.add_trace(go.Scatter(
-        x=[vb], y=[ph],
-        mode="markers",
+        x=[v_added], y=[ph], mode="markers",
         marker=dict(size=14, color="#ef4444", symbol="circle",
                     line=dict(color="white", width=2)),
-        name=f"Current: {vb:.1f} mL, pH {ph:.2f}",
+        name=f"Current: {v_added:.1f} mL, pH {ph:.2f}",
     ))
-    # Equivalence point marker
     fig.add_vline(x=veq, line=dict(color="#10b981", width=2, dash="dash"),
                   annotation_text=f"Eq: {veq:.1f} mL", annotation_position="top left")
+
     fig.update_layout(
-        height=400,
-        xaxis_title="Volume of base (mL)",
-        yaxis_title="pH",
-        yaxis=dict(range=[0, 14]),
-        xaxis=dict(range=[0, vb_max]),
+        height=400, xaxis_title=x_label, yaxis_title="pH",
+        yaxis=dict(range=[0, 14]), xaxis=dict(range=[0, v_max]),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         margin=dict(l=10, r=10, t=30, b=30),
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Indicator info
+    # ── Suitable indicator ────────────────────────────────────
     st.markdown("### Suitable Indicators")
     if ph < 4:
         color, ind = "🔴", "Methyl orange (3.1–4.4)"
